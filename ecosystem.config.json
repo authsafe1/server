@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/pm2-ecosystem.json",
+  "apps": [
+    {
+      "name": "AuthSafe",
+      "script": "./dist/main.js",
+      "exec_mode": "cluster"
+    }
+  ]
+}

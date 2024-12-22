@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authsafe-deployment
+  labels:
+    app: authsafe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authsafe
+  template:
+    metadata:
+      labels:
+        app: authsafe
+    spec:
+      containers:
+        - name: container
+          image: docker.io/anapeksha/authsafe:latest
+          args:
+            - npm
+            - run
+            - start:migrate:container
+          env:
+            - name: TERM
+              value: xterm
+            - name: EMAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: authsafe-secrets
+                  key: EMAIL_PASSWORD
+            - name: EMAIL_ID
+              valueFrom:
+                secretKeyRef:
+                  name: authsafe-secrets
+                  key: EMAIL_ID
+            - name: EMAIL_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: authsafe-secrets
+                  key: EMAIL_FROM
+            - name: EMAIL_OUTGOING_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: authsafe-secrets
+                  key: EMAIL_OUTGOING_SERVER
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: authsafe-secrets
+                  key: DATABASE_URL
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: authsafe-secrets
+                  key: SESSION_SECRET
+            - name: APP_URL
+              valueFrom:
+                secretKeyRef:
+                  name: authsafe-secrets
+                  key: APP_URL
+          ports:
+            - containerPort: 3000
+              hostPort: 3000
+          tty: true
