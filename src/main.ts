@@ -19,7 +19,6 @@ async function bootstrap() {
   dayjs.extend(timezone);
   app.set("trust proxy", "loopback");
   app.use(helmet());
-  app.setGlobalPrefix("api");
   app.use(
     session({
       name: "__session",
@@ -38,7 +37,10 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: ["https://dashboard.authsafe.in", "http://localhost:5173"],
+    origin:
+      process.env.NODE_ENV === "production"
+        ? ["https://dashboard.authsafe.in", "https://authsafe.in"]
+        : ["http://localhost:5173", "http://localhost:8080"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: "Content-Type, Authorization",
     credentials: true,
