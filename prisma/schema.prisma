@@ -25,7 +25,7 @@ model Organization {
   isTwoFactorAuthEnabled Boolean  @default(false)
   twoFactorSecret        String?
 
-  subscription     Subscription?
+  Subscription     Subscription?
   Secret           Secret?
   Branding         Branding?
   EmailTemplates   EmailTemplate[]
@@ -121,17 +121,17 @@ model Webhook {
 }
 
 model Secret {
-  id String @id @default(uuid())
-
+  id         String   @id @default(uuid())
   publicKey  String
   privateKey String
+  apiKey     String   @default("")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   organizationId String       @unique
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@index([privateKey, publicKey, organizationId])
+  @@index([privateKey, publicKey, apiKey, organizationId])
 }
 
 model EmailTemplate {
