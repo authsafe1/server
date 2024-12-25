@@ -219,6 +219,7 @@ export class AuthService {
             Secret: {
               select: {
                 publicKey: true,
+                apiKey: true,
               },
             },
           },

@@ -32,11 +32,7 @@ export class OrganizationService {
   ) {}
 
   private createURL(token: string) {
-    if (process.env.NODE_ENV === "production") {
-      return `${process.env.APP_URL}/auth/confirm?token=${token}`;
-    } else {
-      return `http://localhost:5173/auth/confirm?token=${token}`;
-    }
+    return `${process.env.APP_URL}/auth/confirm?token=${token}`;
   }
 
   private organizationCreationEmailBody(body: Organization, url: string) {
@@ -177,6 +173,8 @@ export class OrganizationService {
 
       const { publicKey, privateKey } = this.generateKeyPair();
 
+      const apiKey = await this.generateApiKey();
+
       const organization = await this.prismaService.organization.create({
         data: {
           name,
@@ -190,6 +188,7 @@ export class OrganizationService {
             create: {
               privateKey,
               publicKey,
+              apiKey,
             },
           },
           Branding: {
@@ -234,6 +233,8 @@ export class OrganizationService {
 
       const { publicKey, privateKey } = this.generateKeyPair();
 
+      const apiKey = await this.generateApiKey();
+
       return await this.prismaService.organization.create({
         data: {
           name,
@@ -247,6 +248,7 @@ export class OrganizationService {
             create: {
               privateKey,
               publicKey,
+              apiKey,
             },
           },
           Branding: {
@@ -350,6 +352,24 @@ export class OrganizationService {
     }
   }
 
+  async rotateApiKey(where: Prisma.OrganizationWhereUniqueInput) {
+    try {
+      const apiKey = await this.generateApiKey();
+      return await this.prismaService.organization.update({
+        where,
+        data: {
+          Secret: {
+            update: {
+              apiKey,
+            },
+          },
+        },
+      });
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
   async updateOrganization(params: {
     where: Prisma.OrganizationWhereUniqueInput;
     data: Prisma.OrganizationUpdateInput;
@@ -432,5 +452,9 @@ export class OrganizationService {
     });
 
     return { publicKey, privateKey };
+  }
+
+  private async generateApiKey() {
+    return (await promisify(randomBytes)(32)).toString("hex");
   }
 }

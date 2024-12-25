@@ -94,7 +94,7 @@ export class OrganizationController {
     @Req() req: Request,
   ) {
     return await this.organizationService.getBranding({
-      organizationId: organizationId || req.session?.organization?.id,
+      organizationId: req.session?.organization?.id || organizationId,
     });
   }
 
@@ -143,6 +143,15 @@ export class OrganizationController {
     } else {
       return { message: "Organization Deleted" };
     }
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Put("secret/rotate")
+  @CacheInvalidate("isAuthenticated")
+  async rotateSecret(@Req() req: Request) {
+    return await this.organizationService.rotateApiKey({
+      id: req.session.organization.id,
+    });
   }
 
   @UseGuards(EnsureLoginGuard)

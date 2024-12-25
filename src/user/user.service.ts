@@ -28,11 +28,7 @@ export class UserService {
   ) {}
 
   private createURL(token: string) {
-    if (process.env.NODE_ENV === "production") {
-      return `${process.env.APP_URL}/user/confirm?token=${token}`;
-    } else {
-      return `http://localhost:5173/user/confirm?token=${token}`;
-    }
+    return `${process.env.APP_URL}/user/confirm?token=${token}`;
   }
 
   private userInvitationEmailBody(url: string) {

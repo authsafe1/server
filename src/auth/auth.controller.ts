@@ -82,16 +82,10 @@ export class AuthController {
         email: organization.email,
         metadata: organization.metadata,
       };
-      return res.redirect(
-        process.env.NODE_ENV === "production"
-          ? "/dashboard"
-          : "http://localhost:5173/dashboard",
-      );
+      return res.redirect(process.env.DASHBOARD_URL);
     } else {
       res.redirect(
-        process.env.NODE_ENV === "production"
-          ? `/auth/google/create?email=${(req.user as any).email}`
-          : `http://localhost:5173/auth/google/create?email=${(req.user as any).email}`,
+        `${process.env.DASHBOARD_URL}/auth/google/create?email=${(req.user as any).email}`,
       );
     }
   }
