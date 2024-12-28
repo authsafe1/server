@@ -38,6 +38,13 @@ export class WebhookController {
     return this.webhookService.getAllWebhooks(dto);
   }
 
+  @Get("count")
+  async countWebhooks(@Req() req: Request) {
+    return this.webhookService.countWebhooks({
+      organizationId: req.session.organization.id,
+    });
+  }
+
   @Get(":id")
   async findOne(@Param("id") id: string) {
     return this.webhookService.getWebhookById(id);

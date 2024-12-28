@@ -43,6 +43,13 @@ export class RoleController {
     return this.roleService.getAllRoles(dto);
   }
 
+  @Get("count")
+  async countUsers(@Req() req: Request) {
+    return this.roleService.countRoles({
+      organizationId: req.session.organization.id,
+    });
+  }
+
   @Get(":id")
   async findOne(@Param("id") id: string) {
     return this.roleService.getRoleById(id);

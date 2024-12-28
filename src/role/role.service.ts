@@ -25,6 +25,16 @@ export class RoleService {
     }
   }
 
+  async countRoles(where: Prisma.RoleWhereInput) {
+    try {
+      return await this.prismaService.role.count({
+        where,
+      });
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
   async getAllRoles(params: {
     skip?: number;
     take?: number;

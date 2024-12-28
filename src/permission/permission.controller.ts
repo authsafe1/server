@@ -37,6 +37,13 @@ export class PermissionController {
     return this.permissionService.getAllPermissions(dto);
   }
 
+  @Get("count")
+  async countPermissions(@Req() req: Request) {
+    return this.permissionService.countPermissions({
+      organizationId: req.session.organization.id,
+    });
+  }
+
   @Get(":id")
   async findOne(@Param("id") id: string) {
     return this.permissionService.getPermissionById(id);

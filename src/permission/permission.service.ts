@@ -52,6 +52,16 @@ export class PermissionService {
     }
   }
 
+  async countPermissions(where: Prisma.PermissionWhereInput) {
+    try {
+      return await this.prismaService.permission.count({
+        where,
+      });
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
   async updatePermission(id: string, data: Prisma.PermissionUpdateInput) {
     const findPermission = await this.prismaService.permission.findUnique({
       where: { id },
