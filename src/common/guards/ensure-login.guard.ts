@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Injectable,
 } from "@nestjs/common";
-import { Request, Response } from "express";
+import { Request } from "express";
 import { PrismaService } from "../modules/prisma/prisma.service";
 
 @Injectable()
@@ -13,7 +13,6 @@ export class EnsureLoginGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest<Request>();
-    const res = context.switchToHttp().getResponse<Response>();
 
     const token = this.getAuthorizationToken(req.headers.authorization);
     let secret = null;
@@ -52,28 +51,27 @@ export class EnsureLoginGuard implements CanActivate {
         };
         return true;
       } else {
-        res.locals.redirectedByGuard = true;
         return false;
       }
     } catch (err) {
       if (err.code === "P2025") {
-        res.locals.redirectedByGuard = true;
-        res.status(401).redirect("/auth/signin");
-        return false;
-      } else if (err.message === "INVALID_API_TOKEN") {
-        throw new ForbiddenException("Invalid Api Token");
+        throw new ForbiddenException("Invalid Session");
       } else {
-        throw new ForbiddenException();
+        throw new ForbiddenException("Invalid Secret");
       }
     }
   }
 
   private getAuthorizationToken(authorizationHeader: string) {
-    const header = authorizationHeader.split("Bearer ");
-    if (!header[1] || header[1] === "") {
-      return null;
+    if (authorizationHeader) {
+      const header = authorizationHeader.split("Bearer ");
+      if (!header[1] || header[1] === "") {
+        return null;
+      } else {
+        return header[1];
+      }
     } else {
-      return header[1];
+      return null;
     }
   }
 }

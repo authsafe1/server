@@ -23,7 +23,7 @@ export class CreateClientDto {
   redirectUri: string;
 
   @IsNotEmpty()
-  @IsIn(["code", "client-credential"])
+  @IsIn(["code", "client-credentials"])
   @IsString()
   grant: string;
 }

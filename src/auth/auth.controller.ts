@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Inject,
+  InternalServerErrorException,
   Post,
   Req,
   Res,
@@ -96,13 +97,13 @@ export class AuthController {
     if (req.session) {
       req.session.destroy(err => {
         if (err) {
-          return res.status(500).json({ message: "Internal Server Error" });
+          throw new InternalServerErrorException("Session unavailable");
         }
         res.clearCookie("__session");
-        return res.redirect("/auth/signin");
+        return { message: "Logged out" };
       });
     } else {
-      return res.redirect("/auth/signin");
+      return { message: "Logged out" };
     }
   }
 

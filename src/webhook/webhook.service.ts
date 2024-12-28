@@ -46,6 +46,16 @@ export class WebhookService {
     }
   }
 
+  async countWebhooks(where: Prisma.WebhookWhereInput) {
+    try {
+      return await this.prismaService.webhook.count({
+        where,
+      });
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
   async updateWebhook(id: string, data: Prisma.WebhookUpdateInput) {
     const webhook = await this.prismaService.webhook.findUnique({
       where: { id },
