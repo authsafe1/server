@@ -1,5 +1,10 @@
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
-import { ExecutionContext, Injectable, UseInterceptors } from "@nestjs/common";
+import {
+  ExecutionContext,
+  Injectable,
+  InternalServerErrorException,
+  UseInterceptors,
+} from "@nestjs/common";
 import { Cache as CacheType } from "cache-manager";
 import { Request } from "express";
 
@@ -46,7 +51,9 @@ export function CacheInvalidate(handlerName: string): MethodDecorator {
         arg => arg && arg.session && arg.session?.organization?.id,
       );
       if (!request) {
-        throw new Error("Request or organization session data not found");
+        throw new InternalServerErrorException(
+          "Request or organization session data not found",
+        );
       }
 
       const result = await originalMethod.apply(this, args);

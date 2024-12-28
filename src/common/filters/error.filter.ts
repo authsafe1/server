@@ -19,10 +19,6 @@ export class ErrorFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
 
-    if (response.locals.redirectedByGuard) {
-      return;
-    }
-
     if (status >= HttpStatus.BAD_REQUEST) {
       const severity = this.determineSeverity(status);
       if (request.session.organization) {
