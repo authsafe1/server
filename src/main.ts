@@ -37,10 +37,9 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://dashboard.authsafe.in", "https://authsafe.in"]
-        : ["http://localhost:5173", "http://localhost:8080"],
+    origin: (origin, callback) => {
+      callback(null, origin);
+    },
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: "Content-Type, Authorization",
     credentials: true,
