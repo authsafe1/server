@@ -11,7 +11,7 @@ import {
   MinLength,
 } from "class-validator";
 
-export class OAuth2Authorize {
+export class OAuth2AuthorizeDto {
   @IsEmail()
   @IsString()
   email: string;
@@ -31,17 +31,19 @@ export class OAuth2AuthorizeQuery {
   organization_id: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsUrl()
   redirect_uri: string;
 
   @IsString()
   @IsNotEmpty()
+  @IsIn(["code", "token"], {
+    message: "Unsupported response type",
+  })
   response_type: string;
 
   @IsArray()
-  @IsOptional()
   @Transform(params => params.value.split(" "))
-  scope?: string[];
+  scope: string[];
 
   @IsString()
   @IsOptional()
@@ -52,15 +54,19 @@ export class OAuth2AuthorizeQuery {
   nonce?: string;
 }
 
-export class OAuth2Token {
+export class OAuth2TokenDto {
   @IsString()
-  @IsIn(["client_credentials", "authorization_code"], {
+  @IsIn(["authorization_code", "client_credentials", "refresh_token"], {
     message: "Unsupported grant type",
   })
-  grant_type: "client_credentials" | "authorization_code";
+  grant_type: "authorization_code" | "client_credentials" | "refresh_token";
 
   @IsString()
   code: string;
+
+  @IsString()
+  @IsOptional()
+  refresh_token?: string;
 
   @IsUrl()
   @IsString()
