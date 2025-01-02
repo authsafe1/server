@@ -86,7 +86,7 @@ export class OAuth2Controller {
   }
 
   @UseGuards(EnsureLoginGuard)
-  @Get("jwks")
+  @Get(".well-known/jwks")
   async jwks(@Req() req: Request) {
     return this.oauth2Service.getJWKS(req.session?.organization?.id);
   }
