@@ -5,9 +5,11 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService, TokenExpiredError } from "@nestjs/jwt";
+import { Client, Permission, Role, User } from "@prisma/client";
 import argon2 from "argon2";
 import { createPublicKey } from "crypto";
 import dayjs from "dayjs";
+import { AuthorizationLogService } from "../common/modules/log/authorization-log.service";
 import { PrismaService } from "../common/modules/prisma/prisma.service";
 
 @Injectable()
@@ -15,6 +17,7 @@ export class OAuth2Service {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly authorizationLogService: AuthorizationLogService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -49,6 +52,8 @@ export class OAuth2Service {
     clientId: string,
     redirectUri: string,
     scope: string[],
+    nonce: string,
+    organizationId: string,
   ) {
     // Validate client and redirect URI
     const client = await this.prismaService.client.findUnique({
@@ -68,6 +73,7 @@ export class OAuth2Service {
         expiresAt,
         redirectUri,
         scope,
+        nonce,
         Client: {
           connect: { id: clientId },
         },
@@ -76,7 +82,29 @@ export class OAuth2Service {
         },
       },
     });
+    await this.prismaService.authorizationLog.create({
+      data: {
+        action: "Authorization Code granted",
+        User: {
+          connect: { id: userId },
+        },
+        Client: {
+          connect: { id: clientId },
+        },
+        Organization: {
+          connect: {
+            id: organizationId,
+          },
+        },
+      },
+    });
 
+    await this.authorizationLogService.logAuthorization(
+      userId,
+      clientId,
+      organizationId,
+      "Authorization code created",
+    );
     return code;
   }
 
@@ -96,6 +124,23 @@ export class OAuth2Service {
   ) {
     const authCode = await this.prismaService.authorizationCode.findUnique({
       where: { code },
+      include: {
+        Client: true,
+        User: {
+          include: {
+            Role: {
+              include: {
+                Permissions: true,
+              },
+            },
+            Organization: {
+              include: {
+                Secret: { select: { id: true, privateKey: true } },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!authCode || authCode.expiresAt < new Date()) {
@@ -112,41 +157,39 @@ export class OAuth2Service {
       throw new UnauthorizedException("Redirect URI mismatch");
     }
 
-    const client = await this.prismaService.client.findUnique({
-      where: { id: clientId },
-    });
-
-    if (!client || client.secret !== clientSecret) {
+    if (authCode.Client.secret !== clientSecret) {
       throw new UnauthorizedException("Invalid client credentials");
     }
 
-    const user = await this.prismaService.user.findUnique({
-      where: { id: authCode.userId },
-    });
-    if (!user) {
+    if (!authCode.User) {
       throw new UnauthorizedException("User not found");
     }
 
-    const secret = await this.prismaService.secret.findUnique({
-      where: { organizationId: user.organizationId },
-    });
-    if (!secret) throw new UnauthorizedException("Missing organization keys");
+    if (!authCode.User.Organization.Secret)
+      throw new UnauthorizedException("Missing organization keys");
 
-    const idToken = this.jwtService.sign(
-      {
-        sub: user.id,
-        aud: clientId,
-        iss: this.configService.get("APP_URL"),
-        iat: dayjs().unix(),
-        exp: dayjs().add(1, "hour").unix(),
-        org_id: user.organizationId,
-      },
-      { privateKey: secret.privateKey, algorithm: "RS256" },
+    const idToken = await this.generateIdToken(
+      authCode.User,
+      authCode.User.Organization.Secret.privateKey,
+      authCode.User.Organization.Secret.id,
+      authCode.Client,
+      authCode.scope,
+      authCode.nonce,
     );
 
-    const accessToken = this.jwtService.sign(
-      { sub: user.id, scope: authCode.scope },
-      { privateKey: secret.privateKey, algorithm: "RS256", expiresIn: "1h" },
+    const accessToken = await this.generateAcessToken(
+      authCode.User,
+      authCode.User.Organization.Secret.privateKey,
+      authCode.User.Organization.Secret.id,
+      authCode.Client,
+      authCode.scope,
+    );
+
+    await this.authorizationLogService.logAuthorization(
+      authCode.userId,
+      authCode.clientId,
+      authCode.User.organizationId,
+      "Token exchanged for Code",
     );
 
     return {
@@ -185,7 +228,7 @@ export class OAuth2Service {
         algorithms: ["RS256"],
       });
       const user = await this.prismaService.user.findUnique({
-        where: { id: verifiedToken.sub },
+        where: { id: verifiedToken.sub.split("|")[1] },
         select: {
           id: true,
           email: true,
@@ -196,12 +239,7 @@ export class OAuth2Service {
       if (!user) {
         throw new UnauthorizedException("User not found");
       }
-      return {
-        sub: user.id,
-        email: user.email,
-        name: user.name,
-        created_at: dayjs(user.createdAt).toISOString(),
-      };
+      return verifiedToken;
     } catch (err) {
       if (err instanceof TokenExpiredError) {
         throw new UnauthorizedException("Expired token");
@@ -239,5 +277,92 @@ export class OAuth2Service {
         },
       ],
     };
+  }
+
+  /**
+   * Generate an Id Token.
+   * @param user: User,
+   * @param privateKey: string,
+   * @param keyId: string,
+   * @param client: Client,
+   * @param scope: string[],
+   * @param nonce: string,.
+   * @returns JWT Id Token.
+   */
+  private async generateIdToken(
+    user: User & { Role: Role & { Permissions: Permission[] } },
+    privateKey: string,
+    keyId: string,
+    client: Client,
+    scope: string[],
+    nonce: string,
+  ) {
+    const standardPayload = {
+      iss: process.env.APP_URI,
+      sub: `authsafe|${user.id}`,
+      aud: client.id,
+      iat: dayjs().unix(),
+      exp: dayjs().add(1, "hour").unix(),
+      nonce,
+      org_id: user.organizationId,
+    };
+
+    let payload = { ...standardPayload };
+
+    if (scope.includes("profile")) {
+      payload["name"] = user?.name;
+      payload["email"] = user?.email;
+      payload["email_verified"] = user?.isVerified;
+    }
+
+    return await this.jwtService.signAsync(payload, {
+      privateKey,
+      algorithm: "RS256",
+      header: { alg: "RS256", kid: keyId },
+    });
+  }
+
+  /**
+   * Generate an Access Token.
+   * @param user: User,
+   * @param privateKey: string,
+   * @param keyId: string,
+   * @param client: Client,
+   * @param scope: string[],
+   * @param nonce: string,.
+   * @returns JWT Access Token.
+   */
+  private async generateAcessToken(
+    user: User & { Role: Role & { Permissions: Permission[] } },
+    privateKey: string,
+    keyId: string,
+    client: Client,
+    scope: string[],
+  ) {
+    const standardPayload = {
+      iss: process.env.APP_URI,
+      sub: `authsafe|${user.id}`,
+      aud: client.id,
+      iat: dayjs().unix(),
+      exp: dayjs().add(1, "hour").unix(),
+      scope,
+      org_id: user.organizationId,
+    };
+
+    let payload = { ...standardPayload };
+
+    if (scope.includes("roles")) {
+      payload["roles"] = user?.Role?.key;
+    }
+
+    if (scope.includes("permissions")) {
+      payload["permissions"] = user?.Role?.Permissions.map(value => value?.key);
+    }
+
+    return await this.jwtService.signAsync(payload, {
+      privateKey,
+      algorithm: "RS256",
+      header: { alg: "RS256", kid: keyId },
+    });
   }
 }
