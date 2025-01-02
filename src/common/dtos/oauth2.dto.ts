@@ -43,6 +43,9 @@ export class OAuth2AuthorizeQuery {
 
   @IsArray()
   @Transform(params => params.value.split(" "))
+  @IsIn(["openid", "profile", "roles", "permissions"], {
+    message: "Unknown scope",
+  })
   scope: string[];
 
   @IsString()
