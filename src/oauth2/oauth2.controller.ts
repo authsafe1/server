@@ -28,7 +28,8 @@ export class OAuth2Controller {
     @Query() query: OAuth2AuthorizeQuery,
   ) {
     const { email, password } = dto;
-    const { client_id, redirect_uri, organization_id, scope } = query;
+    const { client_id, redirect_uri, organization_id, scope, state, nonce } =
+      query;
 
     if (!organization_id) {
       throw new UnauthorizedException("Organization context is missing");
@@ -49,11 +50,11 @@ export class OAuth2Controller {
       client_id,
       redirect_uri,
       scope,
+      nonce,
+      organization_id,
     );
 
-    return {
-      code,
-    };
+    return { redirect_uri, code, state };
   }
 
   @Post("token")
@@ -75,6 +76,7 @@ export class OAuth2Controller {
 
   @Get("userinfo")
   async userInfo(@Headers("authorization") authorization: string) {
+    console.log(authorization);
     if (!authorization || !authorization?.startsWith("Bearer ")) {
       throw new UnauthorizedException(
         "Missing or invalid authorization header",
