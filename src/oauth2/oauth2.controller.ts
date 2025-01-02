@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -12,9 +11,9 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 import {
-  OAuth2Authorize,
+  OAuth2AuthorizeDto,
   OAuth2AuthorizeQuery,
-  OAuth2Token,
+  OAuth2TokenDto,
 } from "../common/dtos/oauth2.dto";
 import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
 import { OAuth2Service } from "./oauth2.service";
@@ -25,76 +24,70 @@ export class OAuth2Controller {
 
   @Post("authorize")
   async authorize(
-    @Body() dto: OAuth2Authorize,
+    @Body() dto: OAuth2AuthorizeDto,
     @Query() query: OAuth2AuthorizeQuery,
-    @Req() req: Request,
   ) {
-    if (!query.scope.includes("openid")) {
-      throw new BadRequestException(
-        "Openid scope is required in authentication scenario",
-      );
+    const { email, password } = dto;
+    const { client_id, redirect_uri, organization_id, scope } = query;
+
+    if (!organization_id) {
+      throw new UnauthorizedException("Organization context is missing");
     }
 
     const user = await this.oauth2Service.validateUser(
-      dto.email,
-      dto.password,
-      query.organization_id,
+      email,
+      password,
+      organization_id,
     );
-    const client = await this.oauth2Service.validateClient(query.client_id);
 
-    const authCode = await this.oauth2Service.grantCode(
-      client,
-      user,
-      query.redirect_uri,
-      query.scope,
-      query.state,
-      query.nonce,
-      req.ip,
+    if (!user) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+
+    const code = await this.oauth2Service.generateAuthorizationCode(
+      user.id,
+      client_id,
+      redirect_uri,
+      scope,
     );
 
     return {
-      authorization_code: authCode.code,
-      state: authCode.state,
-      redirect_uri: authCode.redirectUri,
+      code,
     };
   }
 
   @Post("token")
-  async token(@Body() dto: OAuth2Token) {
-    const client = await this.oauth2Service.validateClient(
-      dto.client_id,
-      dto.client_secret,
+  async token(
+    @Body()
+    dto: OAuth2TokenDto,
+  ) {
+    const { code, client_id, client_secret, redirect_uri } = dto;
+
+    const tokenResponse = await this.oauth2Service.exchangeAuthorizationCode(
+      code,
+      client_id,
+      client_secret,
+      redirect_uri,
     );
 
-    const idToken = await this.oauth2Service.exchangeTokenFromCode(
-      client,
-      dto.code,
-      dto.redirect_uri,
-    );
-
-    return {
-      id_token: idToken,
-      token_type: "Bearer",
-      expires_in: 3600,
-    };
+    return tokenResponse;
   }
 
   @Get("userinfo")
-  async userinfo(@Headers("authorization") authHeader: string) {
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  async userInfo(@Headers("authorization") authorization: string) {
+    if (!authorization || !authorization?.startsWith("Bearer ")) {
       throw new UnauthorizedException(
-        "Authorization header is missing or malformed",
+        "Missing or invalid authorization header",
       );
     }
 
-    const idToken = authHeader.split(" ")[1];
-
-    return await this.oauth2Service.validateToken(idToken);
+    const token = authorization.split(" ")[1];
+    return this.oauth2Service.validateToken(token);
   }
 
   @UseGuards(EnsureLoginGuard)
-  @Get(".well-known/jwks")
+  @Get("jwks")
   async jwks(@Req() req: Request) {
-    return await this.oauth2Service.jwks(req.session.organization?.id);
+    return this.oauth2Service.getJWKS(req.session?.organization?.id);
   }
 }
