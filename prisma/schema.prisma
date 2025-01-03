@@ -242,6 +242,29 @@ model PasswordResetToken {
   @@index([token, organizationId, expiresAt])
 }
 
+model SalesContact {
+  id      String       @id @default(uuid())
+  name    String
+  email   String
+  website String?
+  country String?
+  message String
+  status  TicketStatus @default(OPEN)
+
+  createdAt DateTime @default(now())
+}
+
+model EngineeringContact {
+  id      String       @id @default(uuid())
+  name    String
+  email   String
+  type    String?      @default("Free")
+  message String
+  status  TicketStatus @default(OPEN)
+
+  createdAt DateTime @default(now())
+}
+
 model AuthorizationLog {
   id        String   @id @default(uuid())
   action    String
@@ -314,4 +337,11 @@ enum SubscriptionStatus {
   CANCELLED
   PAST_DUE
   INCOMPLETE
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  UNRESOLVED
 }
