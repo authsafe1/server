@@ -7,6 +7,9 @@ CREATE TYPE "Plan" AS ENUM ('FREE', 'PROFESSIONAL', 'ENTERPRISE');
 -- CreateEnum
 CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'CANCELLED', 'PAST_DUE', 'INCOMPLETE');
 
+-- CreateEnum
+CREATE TYPE "TicketStatus" AS ENUM ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'UNRESOLVED');
+
 -- CreateTable
 CREATE TABLE "Organization" (
     "id" TEXT NOT NULL,
@@ -196,6 +199,33 @@ CREATE TABLE "PasswordResetToken" (
 );
 
 -- CreateTable
+CREATE TABLE "SalesContact" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "website" TEXT,
+    "country" TEXT,
+    "message" TEXT NOT NULL,
+    "status" "TicketStatus" NOT NULL DEFAULT 'OPEN',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "SalesContact_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "EngineeringContact" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "type" TEXT DEFAULT 'Free',
+    "message" TEXT NOT NULL,
+    "status" "TicketStatus" NOT NULL DEFAULT 'OPEN',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "EngineeringContact_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "AuthorizationLog" (
     "id" TEXT NOT NULL,
     "action" TEXT NOT NULL,
@@ -216,6 +246,17 @@ CREATE TABLE "ActivityLog" (
     "organizationId" TEXT NOT NULL,
 
     CONSTRAINT "ActivityLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ApiKey" (
+    "id" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "secretId" TEXT,
+
+    CONSTRAINT "ApiKey_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -342,6 +383,12 @@ CREATE INDEX "AuthorizationLog_userId_clientId_createdAt_idx" ON "AuthorizationL
 CREATE INDEX "ActivityLog_organizationId_createdAt_idx" ON "ActivityLog"("organizationId", "createdAt");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ApiKey_token_key" ON "ApiKey"("token");
+
+-- CreateIndex
+CREATE INDEX "ApiKey_token_expiresAt_idx" ON "ApiKey"("token", "expiresAt");
+
+-- CreateIndex
 CREATE INDEX "SecurityAlert_severity_createdAt_organizationId_idx" ON "SecurityAlert"("severity", "createdAt", "organizationId");
 
 -- CreateIndex
@@ -412,6 +459,9 @@ ALTER TABLE "AuthorizationLog" ADD CONSTRAINT "AuthorizationLog_organizationId_f
 
 -- AddForeignKey
 ALTER TABLE "ActivityLog" ADD CONSTRAINT "ActivityLog_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ApiKey" ADD CONSTRAINT "ApiKey_secretId_fkey" FOREIGN KEY ("secretId") REFERENCES "Secret"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "SecurityAlert" ADD CONSTRAINT "SecurityAlert_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;

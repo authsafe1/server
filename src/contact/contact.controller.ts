@@ -8,11 +8,11 @@ export class ContactController {
 
   @Post("sales")
   async contactSales(@Body() dto: SalesDto) {
-    this.contactService.contactSales(dto);
+    return await this.contactService.contactSales(dto);
   }
 
   @Post("engineering")
   async contactEngineering(@Body() dto: EngineeringDto) {
-    this.contactService.contactEngineering(dto);
+    return await this.contactService.contactEngineering(dto);
   }
 }

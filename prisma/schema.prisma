@@ -124,14 +124,14 @@ model Secret {
   id         String   @id @default(uuid())
   publicKey  String
   privateKey String
-  apiKey     String   @unique @default("")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  apiKeys    ApiKey[]
 
   organizationId String       @unique
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@index([privateKey, publicKey, apiKey, organizationId])
+  @@index([privateKey, publicKey, organizationId])
 }
 
 model EmailTemplate {
@@ -292,6 +292,17 @@ model ActivityLog {
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, createdAt])
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  Secret    Secret?  @relation(fields: [secretId], references: [id])
+  secretId  String?
+
+  @@index([token, expiresAt])
 }
 
 model SecurityAlert {

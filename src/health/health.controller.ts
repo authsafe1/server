@@ -18,13 +18,31 @@ export class HealthController {
     private readonly memory: MemoryHealthIndicator,
   ) {}
 
-  @Get()
+  @Get("ping")
   @HealthCheck()
-  healthCheck() {
+  pingCheck() {
+    [() => this.http.pingCheck("Ping", process.env.APP_URL)];
+  }
+
+  @Get("heap")
+  @HealthCheck()
+  heapCheck() {
     return this.health.check([
-      () => this.http.pingCheck("app", process.env.APP_URL),
-      () => this.prisma.pingCheck("database", this.prismaService),
       () => this.memory.checkHeap("heap", 1024 * 1024 * 1024),
+    ]);
+  }
+
+  @Get("db")
+  @HealthCheck()
+  databaseCheck() {
+    return this.health.check([
+      () => this.prisma.pingCheck("database", this.prismaService),
+    ]);
+  }
+  @Get("rss")
+  @HealthCheck()
+  rssCheck() {
+    return this.health.check([
       () => this.memory.checkRSS("rss", 200 * 1024 * 1024),
     ]);
   }
