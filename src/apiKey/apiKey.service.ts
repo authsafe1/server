@@ -29,6 +29,7 @@ export class ApiKeyService {
       const token = await this.generateToken();
       return await this.prismaService.apiKey.create({
         data: {
+          ...data,
           token,
           expiresAt: expiresAt.toDate(),
           Secret: { connect: { id: organization.Secret.id } },
