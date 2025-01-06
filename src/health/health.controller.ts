@@ -21,7 +21,9 @@ export class HealthController {
   @Get("ping")
   @HealthCheck()
   pingCheck() {
-    [() => this.http.pingCheck("Ping", process.env.APP_URL)];
+    return this.health.check([
+      () => this.http.pingCheck("Ping", process.env.APP_URL),
+    ]);
   }
 
   @Get("heap")
