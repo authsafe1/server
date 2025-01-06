@@ -81,6 +81,7 @@ export class TwoFAService {
           where: {
             email,
           },
+          include: { Secret: { select: { id: true, privateKey: true } } },
         });
       const isValid = authenticator.verify({
         token,
@@ -102,7 +103,11 @@ export class TwoFAService {
           code,
           isUsed: false,
         },
-        include: { Organization: true },
+        include: {
+          Organization: {
+            include: { Secret: { select: { id: true, privateKey: true } } },
+          },
+        },
       });
       await this.prismaService.backupCode.update({
         where: { id: backupCode.id },

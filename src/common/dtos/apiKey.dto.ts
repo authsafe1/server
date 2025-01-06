@@ -3,12 +3,22 @@ import { Type } from "class-transformer";
 import {
   IsDateString,
   IsInt,
+  IsNotEmpty,
   IsObject,
   IsOptional,
+  IsString,
   Min,
 } from "class-validator";
 
 export class CreateApiKeyDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
   @IsDateString()
   expiresAt: Date;
 }

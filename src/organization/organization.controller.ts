@@ -63,6 +63,7 @@ export class OrganizationController {
       domain: organization.domain,
       email: organization.email,
       metadata: organization.metadata,
+      Secret: organization.Secret,
     };
     return organization;
   }
@@ -143,15 +144,6 @@ export class OrganizationController {
     } else {
       return { message: "Organization Deleted" };
     }
-  }
-
-  @UseGuards(EnsureLoginGuard)
-  @Put("secret/rotate")
-  @CacheInvalidate("isAuthenticated")
-  async rotateSecret(@Req() req: Request) {
-    return await this.organizationService.rotateApiKey({
-      id: req.session.organization.id,
-    });
   }
 
   @UseGuards(EnsureLoginGuard)

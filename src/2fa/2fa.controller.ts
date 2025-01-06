@@ -58,6 +58,7 @@ export class TwoFAController {
         email: organization.email,
         domain: organization.domain,
         metadata: organization.metadata,
+        Secret: organization.Secret,
       };
       return res.status(200).json({ message: "2FA Verified" });
     }
@@ -78,6 +79,7 @@ export class TwoFAController {
       domain: organization.domain,
       email: organization.email,
       metadata: organization.metadata,
+      Secret: organization.Secret,
     };
     return res.status(200).json({ message: "Backup Code Verified" });
   }
