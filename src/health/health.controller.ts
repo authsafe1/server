@@ -1,4 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import {
   HealthCheck,
   HealthCheckService,
@@ -16,13 +17,14 @@ export class HealthController {
     private readonly prisma: PrismaHealthIndicator,
     private readonly prismaService: PrismaService,
     private readonly memory: MemoryHealthIndicator,
+    private readonly configService: ConfigService,
   ) {}
 
   @Get("ping")
   @HealthCheck()
   pingCheck() {
     return this.health.check([
-      () => this.http.pingCheck("Ping", process.env.APP_URL),
+      () => this.http.pingCheck("ping", this.configService.get("APP_URL")),
     ]);
   }
 
