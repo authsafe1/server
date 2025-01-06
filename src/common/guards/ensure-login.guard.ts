@@ -14,21 +14,6 @@ export class EnsureLoginGuard implements CanActivate {
   async canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest<Request>();
 
-    const token = this.getAuthorizationToken(req.headers.authorization);
-    let secret = null;
-    if (token) {
-      secret = await this.prismaService.secret.findUnique({
-        where: {
-          apiKey: token,
-        },
-        include: {
-          Organization: {
-            omit: { password: true, twoFactorSecret: true },
-          },
-        },
-      });
-    }
-
     try {
       if (req.session && req.session.organization) {
         const organization =
@@ -36,19 +21,12 @@ export class EnsureLoginGuard implements CanActivate {
             where: {
               id: req.session.organization.id,
             },
+            include: {
+              Secret: { select: { id: true, privateKey: true } },
+            },
             omit: { password: true, twoFactorSecret: true },
           });
         req.user = organization;
-        return true;
-      } else if (secret) {
-        req.user = secret.Organization;
-        req.session.organization = {
-          id: secret.Organization.id,
-          name: secret.Organization.name,
-          domain: secret.Organization.domain,
-          email: secret.Organization.email,
-          metadata: secret.Organization.metadata,
-        };
         return true;
       } else {
         return false;

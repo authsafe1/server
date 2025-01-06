@@ -80,6 +80,11 @@ export class AuthService {
           where: {
             email,
           },
+          include: {
+            Secret: {
+              select: { id: true, privateKey: true },
+            },
+          },
         });
       if (await argon2.verify(organization.password, password)) {
         await this.activityLogService.logActivity(
@@ -147,6 +152,11 @@ export class AuthService {
       const organization = await this.prismaService.organization.findUnique({
         where: {
           email,
+        },
+        include: {
+          Secret: {
+            select: { id: true, privateKey: true },
+          },
         },
       });
       if (organization) {
@@ -219,7 +229,6 @@ export class AuthService {
             Secret: {
               select: {
                 publicKey: true,
-                apiKey: true,
               },
             },
           },

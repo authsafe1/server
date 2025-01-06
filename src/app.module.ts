@@ -15,6 +15,7 @@ import { ErrorFilter } from "./common/filters/error.filter";
 import { ListenerModule } from "./common/modules/listeners/listener.module";
 import { LogModule } from "./common/modules/log/log.module";
 import { PrismaModule } from "./common/modules/prisma/prisma.module";
+import { ContactModule } from "./contact/contact.module";
 import { HealthModule } from "./health/health.module";
 import { OAuth2Module } from "./oauth2/oauth2.module";
 import { OrganizationModule } from "./organization/organization.module";
@@ -74,6 +75,7 @@ import { WebhookModule } from "./webhook/webhook.module";
     RoleModule,
     LogModule,
     WebhookModule,
+    ContactModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

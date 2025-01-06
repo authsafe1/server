@@ -54,6 +54,7 @@ export class AuthController {
           domain: organization.domain,
           email: organization.email,
           metadata: organization.metadata,
+          Secret: organization.Secret,
         };
         return res.status(200).json({ message: "Logged in" });
       }
@@ -82,6 +83,7 @@ export class AuthController {
         domain: organization.domain,
         email: organization.email,
         metadata: organization.metadata,
+        Secret: organization.Secret,
       };
       return res.redirect(process.env.DASHBOARD_URL);
     } else {

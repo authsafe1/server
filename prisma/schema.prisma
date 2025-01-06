@@ -124,14 +124,14 @@ model Secret {
   id         String   @id @default(uuid())
   publicKey  String
   privateKey String
-  apiKey     String   @unique @default("")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  apiKeys    ApiKey[]
 
   organizationId String       @unique
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@index([privateKey, publicKey, apiKey, organizationId])
+  @@index([privateKey, publicKey, organizationId])
 }
 
 model EmailTemplate {
@@ -242,6 +242,29 @@ model PasswordResetToken {
   @@index([token, organizationId, expiresAt])
 }
 
+model SalesContact {
+  id      String       @id @default(uuid())
+  name    String
+  email   String
+  website String?
+  country String?
+  message String
+  status  TicketStatus @default(OPEN)
+
+  createdAt DateTime @default(now())
+}
+
+model EngineeringContact {
+  id      String       @id @default(uuid())
+  name    String
+  email   String
+  type    String?      @default("Free")
+  message String
+  status  TicketStatus @default(OPEN)
+
+  createdAt DateTime @default(now())
+}
+
 model AuthorizationLog {
   id        String   @id @default(uuid())
   action    String
@@ -269,6 +292,18 @@ model ActivityLog {
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, createdAt])
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  Secret   Secret? @relation(fields: [secretId], references: [id])
+  secretId String?
+
+  @@index([token, expiresAt])
 }
 
 model SecurityAlert {
@@ -314,4 +349,11 @@ enum SubscriptionStatus {
   CANCELLED
   PAST_DUE
   INCOMPLETE
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  UNRESOLVED
 }
