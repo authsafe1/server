@@ -4,9 +4,10 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
 import { Prisma, Secret } from "@prisma/client";
+import { randomBytes } from "crypto";
 import dayjs from "dayjs";
+import { promisify } from "util";
 import { PrismaService } from "../common/modules/prisma/prisma.service";
 
 @Injectable()
@@ -14,7 +15,6 @@ export class ApiKeyService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
   ) {}
 
   async createApiKey(
@@ -26,16 +26,7 @@ export class ApiKeyService {
   ) {
     try {
       const expiresAt = dayjs(data.expiresAt);
-      const payload = {
-        sub: `authsafe|${organization.id}`,
-        iat: dayjs().unix(),
-        iss: this.configService.get("API_URL"),
-        type: "access",
-        exp: expiresAt.unix(),
-      };
-      const token = await this.jwtService.signAsync(payload, {
-        privateKey: organization.Secret.privateKey,
-      });
+      const token = await this.generateToken();
       return await this.prismaService.apiKey.create({
         data: {
           token,
@@ -70,14 +61,20 @@ export class ApiKeyService {
     });
   }
 
-  async getApiKeyById(id: string) {
+  async getApiKeyByToken(
+    token: string,
+    organization: {
+      id: string;
+      Secret: Pick<Secret, "privateKey" | "id">;
+    },
+  ) {
     try {
-      return await this.prismaService.role.findUniqueOrThrow({
-        where: { id },
+      return await this.prismaService.apiKey.findUniqueOrThrow({
+        where: { token, secretId: organization.Secret.id },
       });
     } catch (error) {
       if (error.code === "P2025") {
-        throw new NotFoundException(`Role with ID ${id} not found`);
+        throw new NotFoundException(`ApiKey with Token ${token} not found`);
       } else {
         throw new InternalServerErrorException();
       }
@@ -85,14 +82,18 @@ export class ApiKeyService {
   }
 
   async deleteApiKey(token: string) {
-    const findRole = await this.prismaService.apiKey.findUnique({
+    const findApiKey = await this.prismaService.apiKey.findUnique({
       where: { token },
     });
-    if (!findRole) {
+    if (!findApiKey) {
       throw new NotFoundException(`ApiKey with Token ${token} not found`);
     }
     return await this.prismaService.apiKey.delete({
       where: { token },
     });
+  }
+
+  private async generateToken() {
+    return (await promisify(randomBytes)(32)).toString("hex");
   }
 }

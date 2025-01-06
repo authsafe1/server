@@ -22,9 +22,7 @@ export class ApiKeyController {
   @Post("create")
   async create(@Body() dto: CreateApiKeyDto, @Req() req: Request) {
     return this.apiKeyService.createApiKey(
-      {
-        expiresAt: dto.expiresAt,
-      },
+      { ...dto },
       {
         id: req.session.organization.id,
         Secret: req.session.organization.Secret,
@@ -42,9 +40,9 @@ export class ApiKeyController {
     return this.apiKeyService.countApiKeys({});
   }
 
-  @Get(":id")
-  async findOne(@Param("id") id: string) {
-    return this.apiKeyService.getApiKeyById(id);
+  @Get(":token")
+  async findOne(@Param("token") token: string, @Req() req: Request) {
+    return this.apiKeyService.getApiKeyByToken(token, req.session.organization);
   }
 
   @Delete("delete/:id")

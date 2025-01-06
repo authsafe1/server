@@ -8,6 +8,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import cacheManagerStore from "cache-manager-ioredis";
 import { TwoFAModule } from "./2fa/2fa.module";
+import { ApiKeyModule } from "./apiKey/apiKey.module";
 import { AuthModule } from "./auth/auth.module";
 import { ClientModule } from "./client/client.module";
 import { redis } from "./common/config/redis.config";
@@ -71,6 +72,7 @@ import { WebhookModule } from "./webhook/webhook.module";
     PrismaModule,
     TwoFAModule,
     PermissionModule,
+    ApiKeyModule,
     ScheduleModule,
     RoleModule,
     LogModule,
