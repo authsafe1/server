@@ -299,8 +299,9 @@ model ApiKey {
   token     String   @unique
   createdAt DateTime @default(now())
   expiresAt DateTime
-  Secret    Secret?  @relation(fields: [secretId], references: [id])
-  secretId  String?
+
+  Secret   Secret? @relation(fields: [secretId], references: [id])
+  secretId String?
 
   @@index([token, expiresAt])
 }
