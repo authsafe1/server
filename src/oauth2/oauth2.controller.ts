@@ -76,7 +76,6 @@ export class OAuth2Controller {
 
   @Get("userinfo")
   async userInfo(@Headers("authorization") authorization: string) {
-    console.log(authorization);
     if (!authorization || !authorization?.startsWith("Bearer ")) {
       throw new UnauthorizedException(
         "Missing or invalid authorization header",
