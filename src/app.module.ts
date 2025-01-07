@@ -9,6 +9,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import cacheManagerStore from "cache-manager-ioredis";
 import { TwoFAModule } from "./2fa/2fa.module";
 import { ApiKeyModule } from "./apiKey/apiKey.module";
+import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
 import { ClientModule } from "./client/client.module";
 import { redis } from "./common/config/redis.config";
@@ -79,6 +80,7 @@ import { WebhookModule } from "./webhook/webhook.module";
     WebhookModule,
     ContactModule,
   ],
+  controllers: [AppController],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_FILTER, useClass: ErrorFilter },
