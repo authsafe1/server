@@ -1,57 +1,31 @@
-### Proprietary License Agreement
-
-**Copyright © 2024 AuthSafe.**  
-**All Rights Reserved.**
+Proprietary License Agreement
+Copyright © 2025 AuthSafe.
+All Rights Reserved.
 
 This software and associated documentation files (the "Software") are the proprietary property of Anapeksha Mukherjee ("Owner"). By accessing or using this Software, you agree to comply with and be bound by the terms set forth in this License Agreement. If you do not agree to these terms, you are not permitted to access, use, copy, modify, or distribute the Software in any way.
 
----
+1. License Grant
+   No license, permission, or rights are granted to any party to use, copy, modify, publish, distribute, sublicense, or sell copies of this Software or any derivatives thereof, except for the Owner.
 
-### 1. License Grant
+2. Restrictions
+   No Use or Access: The Software is for the sole use of the Owner. No other individual, organization, or entity is permitted to use, access, or benefit from the Software.
+   No Distribution: Distribution, sharing, or making the Software available in any form to any third party is strictly prohibited.
+   No Modification: Modifications, adaptations, reverse engineering, or derivative works based on the Software are strictly prohibited.
+   No Commercial or Non-Commercial Use: Use of the Software for any purpose, whether commercial or non-commercial, is prohibited without explicit written consent from the Owner.
+3. Ownership
+   The Owner retains all rights, title, and interest in and to the Software, including any modifications, updates, or derivatives created by any unauthorized party (which are also owned by the Owner).
 
-No license, permission, or rights are granted to any party to use, copy, modify, publish, distribute, sublicense, or sell copies of this Software or any derivatives thereof, except for the Owner.
+4. Liability and Enforcement
+   Unauthorized access, use, copying, or distribution of the Software constitutes a breach of this License Agreement and a violation of copyright law. The Owner reserves the right to take legal action to enforce their rights.
+   Violators will be liable for damages, legal fees, and any associated costs incurred by the Owner in enforcing this Agreement.
+5. Disclaimer
+   THIS SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NONINFRINGEMENT. IN NO EVENT SHALL THE OWNER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
----
+6. Termination
+   This Agreement is effective until terminated. Your rights under this Agreement will automatically terminate without notice if you fail to comply with its terms. Upon termination, you must immediately cease all use and destroy any copies of the Software in your possession.
 
-### 2. Restrictions
+7. Governing Law
+   This License Agreement is governed by and construed in accordance with the laws of INDIA. Any disputes arising from this Agreement will be subject to the exclusive jurisdiction of the courts in INDIA.
 
-- **No Use or Access:** The Software is for the sole use of the Owner. No other individual, organization, or entity is permitted to use, access, or benefit from the Software.
-- **No Distribution:** Distribution, sharing, or making the Software available in any form to any third party is strictly prohibited.
-- **No Modification:** Modifications, adaptations, reverse engineering, or derivative works based on the Software are strictly prohibited.
-- **No Commercial or Non-Commercial Use:** Use of the Software for any purpose, whether commercial or non-commercial, is prohibited without explicit written consent from the Owner.
-
----
-
-### 3. Ownership
-
-The Owner retains all rights, title, and interest in and to the Software, including any modifications, updates, or derivatives created by any unauthorized party (which are also owned by the Owner).
-
----
-
-### 4. Liability and Enforcement
-
-- Unauthorized access, use, copying, or distribution of the Software constitutes a breach of this License Agreement and a violation of copyright law. The Owner reserves the right to take legal action to enforce their rights.
-- Violators will be liable for damages, legal fees, and any associated costs incurred by the Owner in enforcing this Agreement.
-
----
-
-### 5. Disclaimer
-
-THIS SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NONINFRINGEMENT. IN NO EVENT SHALL THE OWNER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
----
-
-### 6. Termination
-
-This Agreement is effective until terminated. Your rights under this Agreement will automatically terminate without notice if you fail to comply with its terms. Upon termination, you must immediately cease all use and destroy any copies of the Software in your possession.
-
----
-
-### 7. Governing Law
-
-This License Agreement is governed by and construed in accordance with the laws of INDIA. Any disputes arising from this Agreement will be subject to the exclusive jurisdiction of the courts in INDIA.
-
----
-
-**Notice:**  
+Notice:
 If you choose to make this license publicly visible (e.g., on GitHub), make sure to enforce access control for your repository (e.g., private repos only) to prevent any unauthorized download.
