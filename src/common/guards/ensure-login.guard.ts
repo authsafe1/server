@@ -14,8 +14,36 @@ export class EnsureLoginGuard implements CanActivate {
   async canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest<Request>();
 
+    const token = this.getAuthorizationToken(req.headers.authorization);
+
     try {
-      if (req.session && req.session.organization) {
+      if (token) {
+        const apiKey = await this.prismaService.apiKey.findFirstOrThrow({
+          where: {
+            token,
+            expiresAt: {
+              gt: new Date(),
+            },
+          },
+          include: {
+            Secret: {
+              include: { Organization: true },
+            },
+          },
+        });
+        req.session.organization = {
+          id: apiKey.Secret.Organization.id,
+          name: apiKey.Secret.Organization.name,
+          domain: apiKey.Secret.Organization.domain,
+          email: apiKey.Secret.Organization.email,
+          Secret: {
+            id: apiKey.Secret.id,
+            privateKey: apiKey.Secret.privateKey,
+          },
+          metadata: apiKey.Secret.Organization.metadata,
+        };
+        return true;
+      } else if (req.session && req.session.organization) {
         const organization =
           await this.prismaService.organization.findUniqueOrThrow({
             where: {
@@ -35,7 +63,7 @@ export class EnsureLoginGuard implements CanActivate {
       if (err.code === "P2025") {
         throw new ForbiddenException("Invalid Session");
       } else {
-        throw new ForbiddenException("Invalid Secret");
+        throw new ForbiddenException("Invalid Api Key");
       }
     }
   }
