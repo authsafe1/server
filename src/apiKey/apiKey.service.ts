@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Prisma, Secret } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { randomBytes } from "crypto";
 import dayjs from "dayjs";
 import { promisify } from "util";
@@ -19,10 +19,7 @@ export class ApiKeyService {
 
   async createApiKey(
     data: Omit<Prisma.ApiKeyCreateInput, "token">,
-    organization: {
-      id: string;
-      Secret: Pick<Secret, "privateKey" | "id">;
-    },
+    secretId: string,
   ) {
     try {
       const expiresAt = dayjs(data.expiresAt);
@@ -32,7 +29,7 @@ export class ApiKeyService {
           ...data,
           token,
           expiresAt: expiresAt.toDate(),
-          Secret: { connect: { id: organization.Secret.id } },
+          Secret: { connect: { id: secretId } },
         },
       });
     } catch {
@@ -50,28 +47,31 @@ export class ApiKeyService {
     }
   }
 
-  async getAllApiKeys(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.ApiKeyWhereUniqueInput;
-    where?: Prisma.ApiKeyWhereInput;
-    orderBy?: Prisma.ApiKeyOrderByWithRelationInput;
-  }) {
+  async getAllApiKeys(
+    params: {
+      skip?: number;
+      take?: number;
+      cursor?: Prisma.ApiKeyWhereUniqueInput;
+      where?: Prisma.ApiKeyWhereInput;
+      orderBy?: Prisma.ApiKeyOrderByWithRelationInput;
+    },
+    secretId: string,
+  ) {
+    console.log(params);
+    const { where, ...paramsWithoutWhere } = params;
     return this.prismaService.apiKey.findMany({
-      ...params,
+      ...paramsWithoutWhere,
+      where: {
+        ...where,
+        secretId,
+      },
     });
   }
 
-  async getApiKeyByToken(
-    token: string,
-    organization: {
-      id: string;
-      Secret: Pick<Secret, "privateKey" | "id">;
-    },
-  ) {
+  async getApiKeyByToken(token: string, secretId: string) {
     try {
       return await this.prismaService.apiKey.findUniqueOrThrow({
-        where: { token, secretId: organization.Secret.id },
+        where: { token, secretId },
       });
     } catch (error) {
       if (error.code === "P2025") {
@@ -82,9 +82,9 @@ export class ApiKeyService {
     }
   }
 
-  async deleteApiKey(token: string) {
+  async deleteApiKey(token: string, secretId: string) {
     const findApiKey = await this.prismaService.apiKey.findUnique({
-      where: { token },
+      where: { token, secretId },
     });
     if (!findApiKey) {
       throw new NotFoundException(`ApiKey with Token ${token} not found`);

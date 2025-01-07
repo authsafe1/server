@@ -23,30 +23,40 @@ export class ApiKeyController {
   async create(@Body() dto: CreateApiKeyDto, @Req() req: Request) {
     return this.apiKeyService.createApiKey(
       { ...dto },
-      {
-        id: req.session.organization.id,
-        Secret: req.session.organization.Secret,
-      },
+      req.session.organization?.Secret?.id,
     );
   }
 
   @Post("all")
-  async findAll(@Body() dto: ApiKeysDto) {
-    return this.apiKeyService.getAllApiKeys(dto);
+  async findAll(@Body() dto: ApiKeysDto, @Req() req: Request) {
+    const apikey = await this.apiKeyService.getAllApiKeys(
+      dto,
+      req.session.organization?.Secret?.id,
+    );
+    console.log(apikey);
+    return apikey;
   }
 
   @Get("count")
-  async getCount() {
-    return this.apiKeyService.countApiKeys({});
+  async getCount(@Req() req: Request) {
+    return this.apiKeyService.countApiKeys({
+      secretId: req.session.organization?.Secret?.id,
+    });
   }
 
   @Get(":token")
   async findOne(@Param("token") token: string, @Req() req: Request) {
-    return this.apiKeyService.getApiKeyByToken(token, req.session.organization);
+    return this.apiKeyService.getApiKeyByToken(
+      token,
+      req.session.organization?.Secret?.id,
+    );
   }
 
   @Delete("delete/:id")
-  async remove(@Param("id") id: string) {
-    return this.apiKeyService.deleteApiKey(id);
+  async remove(@Param("token") token: string, @Req() req: Request) {
+    return this.apiKeyService.deleteApiKey(
+      token,
+      req.session.organization?.Secret?.id,
+    );
   }
 }
