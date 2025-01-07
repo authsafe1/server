@@ -32,6 +32,9 @@ export class CleanupQueueProcessor extends WorkerHost {
         case CleanupAction.OLD_LOGS:
           await this.clearOldLogs();
           break;
+        case CleanupAction.EXPIRED_API_KEY:
+          await this.clearApiKey();
+          break;
         default:
           this.logger.warn(`Job ${job.name} not found.`);
       }
@@ -78,6 +81,16 @@ export class CleanupQueueProcessor extends WorkerHost {
       where: { isVerified: false },
     });
     this.logger.log(`Unverified organizations cleared: ${tempUser.count}`);
+  }
+
+  private async clearApiKey() {
+    const now = new Date();
+    const refreshTokenResult = await this.prisma.apiKey.deleteMany({
+      where: { expiresAt: { lt: now } },
+    });
+    this.logger.log(
+      `Expired refresh tokens cleared: ${refreshTokenResult.count}`,
+    );
   }
 
   private async clearOldLogs() {

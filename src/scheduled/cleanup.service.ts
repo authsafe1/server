@@ -31,6 +31,11 @@ export class CleanupService {
     await this.cleanupQueue.add(CleanupAction.UNVERIFIED_USERS, {});
   }
 
+  @Interval(6 * 60 * 60 * 1000)
+  async clearExpiredApiKeys() {
+    await this.cleanupQueue.add(CleanupAction.EXPIRED_API_KEY, {});
+  }
+
   @Cron("0 0 * * *")
   async clearOldLogs() {
     await this.cleanupQueue.add(CleanupAction.OLD_LOGS, {});
