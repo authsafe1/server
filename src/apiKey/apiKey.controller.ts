@@ -33,7 +33,6 @@ export class ApiKeyController {
       dto,
       req.session.organization?.Secret?.id,
     );
-    console.log(apikey);
     return apikey;
   }
 
@@ -52,7 +51,7 @@ export class ApiKeyController {
     );
   }
 
-  @Delete("delete/:id")
+  @Delete("delete/:token")
   async remove(@Param("token") token: string, @Req() req: Request) {
     return this.apiKeyService.deleteApiKey(
       token,

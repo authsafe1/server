@@ -57,7 +57,6 @@ export class ApiKeyService {
     },
     secretId: string,
   ) {
-    console.log(params);
     const { where, ...paramsWithoutWhere } = params;
     return this.prismaService.apiKey.findMany({
       ...paramsWithoutWhere,
