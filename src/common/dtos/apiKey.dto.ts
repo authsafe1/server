@@ -1,13 +1,14 @@
 import { Prisma } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
-  IsDateString,
+  IsDate,
   IsInt,
   IsNotEmpty,
   IsObject,
   IsOptional,
   IsString,
   Min,
+  MinDate,
 } from "class-validator";
 
 export class CreateApiKeyDto {
@@ -19,7 +20,10 @@ export class CreateApiKeyDto {
   @IsOptional()
   description?: string;
 
-  @IsDateString()
+  @IsDate()
+  @MinDate(new Date(), {
+    message: "Expiry date must be not be in the past",
+  })
   expiresAt: Date;
 }
 
