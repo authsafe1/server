@@ -22,6 +22,7 @@ import {
   LoginDto,
   ResetPasswordDto,
 } from "../common/dtos/auth.dto";
+import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
 import { AuthService } from "./auth.service";
 
 @Controller("auth")
@@ -126,6 +127,7 @@ export class AuthController {
 
   @SkipThrottle()
   @Cache(60)
+  @UseGuards(EnsureLoginGuard)
   @Get("check")
   async isAuthenticated(@Req() req: Request) {
     return this.authService.isAuthenticated(req?.session);

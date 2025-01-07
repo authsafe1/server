@@ -300,6 +300,7 @@ model ApiKey {
   description String?
   token       String   @unique
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   expiresAt   DateTime
 
   Secret   Secret? @relation(fields: [secretId], references: [id])
