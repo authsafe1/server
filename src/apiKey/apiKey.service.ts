@@ -37,6 +37,24 @@ export class ApiKeyService {
     }
   }
 
+  async updateApiKey(
+    data: Prisma.ApiKeyUpdateInput,
+    token: string,
+    secretId: string,
+  ) {
+    try {
+      return await this.prismaService.apiKey.update({
+        data,
+        where: {
+          token,
+          secretId,
+        },
+      });
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
   async countApiKeys(where: Prisma.ApiKeyWhereInput) {
     try {
       return await this.prismaService.apiKey.count({
