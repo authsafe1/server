@@ -56,11 +56,16 @@ export class RoleController {
   }
 
   @Put("update/:id")
-  async update(
-    @Param("id") id: string,
-    @Body() updatePermissionDto: UpdateRoleDto,
-  ) {
-    return this.roleService.updateRole(id, updatePermissionDto);
+  async update(@Param("id") id: string, @Body() dto: UpdateRoleDto) {
+    const { permissions, ...dtoWithoutPermissions } = dto;
+    return this.roleService.updateRole(id, {
+      ...dtoWithoutPermissions,
+      Permissions: {
+        connect: permissions.map(value => {
+          return { id: value.id };
+        }),
+      },
+    });
   }
 
   @Delete("delete/:id")
