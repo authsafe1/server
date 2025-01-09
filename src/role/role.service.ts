@@ -44,6 +44,7 @@ export class RoleService {
   }) {
     return this.prismaService.role.findMany({
       ...params,
+      include: { Permissions: true },
     });
   }
 
