@@ -51,6 +51,11 @@ export class UpdateRoleDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RolePermissionDto)
+  permissions: Permission[];
 }
 
 export class RolesDto {
