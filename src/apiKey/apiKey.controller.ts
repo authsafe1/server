@@ -6,11 +6,16 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Req,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
-import { ApiKeysDto, CreateApiKeyDto } from "src/common/dtos/apiKey.dto";
+import {
+  ApiKeysDto,
+  CreateApiKeyDto,
+  UpdateApiKeyDto,
+} from "../common/dtos/apiKey.dto";
 import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
 import { ApiKeyService } from "./apiKey.service";
 
@@ -41,6 +46,19 @@ export class ApiKeyController {
     return this.apiKeyService.countApiKeys({
       secretId: req.session.organization?.Secret?.id,
     });
+  }
+
+  @Put("update/:token")
+  async updateApiKey(
+    @Param("token") token: string,
+    @Body() dto: UpdateApiKeyDto,
+    @Req() req: Request,
+  ) {
+    return this.apiKeyService.updateApiKey(
+      dto,
+      token,
+      req.session.organization?.Secret?.id,
+    );
   }
 
   @Get(":token")

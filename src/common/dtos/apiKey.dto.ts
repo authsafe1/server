@@ -27,6 +27,23 @@ export class CreateApiKeyDto {
   expiresAt: Date;
 }
 
+export class UpdateApiKeyDto {
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsDate()
+  @MinDate(new Date(), {
+    message: "Expiry date must be not be in the past",
+  })
+  @IsOptional()
+  expiresAt?: Date;
+}
+
 export class ApiKeysDto {
   @IsOptional()
   @IsInt()
