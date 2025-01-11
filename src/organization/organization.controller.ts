@@ -5,16 +5,13 @@ import {
   Delete,
   Get,
   Inject,
+  Param,
   Post,
   Put,
-  Query,
   Req,
   Res,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
 import { Cache } from "cache-manager";
 import { Request, Response } from "express";
 import { CacheInvalidate } from "../common/decorators/cache.decorator";
@@ -25,7 +22,6 @@ import {
 } from "../common/dtos/log.dto";
 import {
   CreateOrganizationDto,
-  UpdateBranding,
   UpdateOrganizationDto,
 } from "../common/dtos/organization.dto";
 import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
@@ -45,84 +41,28 @@ export class OrganizationController {
   ) {}
 
   @Post("create")
-  async createUser(@Body() dto: CreateOrganizationDto) {
-    return await this.organizationService.createOrganization(dto);
-  }
-
-  @Post("google/create")
-  //@CacheInvalidate("isAuthenticated")
-  async createUserFromGoogle(
-    @Body() dto: CreateOrganizationDto,
-    @Req() req: Request,
-  ) {
-    const organization =
-      await this.organizationService.createOrganizationDirectly(dto);
-    req.session.organization = {
-      id: organization.id,
-      name: organization.name,
-      domain: organization.domain,
-      email: organization.email,
-      metadata: organization.metadata,
-      Secret: organization.Secret,
-    };
-    return organization;
-  }
-
-  @Post("confirm")
-  @CacheInvalidate("isAuthenticated")
-  async verifyOrganization(@Query("token") token: string, @Req() req: Request) {
-    return await this.organizationService.verifyOrganizationCreation(
-      token,
-      req.ip ||
-        (req.headers["x-forwarded-for"] as string) ||
-        (req.socket.remoteAddress as string),
-    );
-  }
-
-  @UseGuards(EnsureLoginGuard)
-  @Put("branding/update")
-  async updateBranding(@Req() req: Request, @Body() dto: UpdateBranding) {
-    return await this.organizationService.updateBranding(
-      { organizationId: req.session?.organization?.id },
-      dto,
-    );
-  }
-
-  @UseGuards(EnsureLoginGuard)
-  @Get("branding")
-  async getBranding(
-    @Query("organizationId") organizationId: string,
-    @Req() req: Request,
-  ) {
-    return await this.organizationService.getBranding({
-      organizationId: req.session?.organization?.id || organizationId,
+  async createUser(@Body() dto: CreateOrganizationDto, @Req() req: Request) {
+    return await this.organizationService.createOrganization({
+      ...dto,
+      Profile: {
+        connect: {
+          id: req.session.profile.id,
+        },
+      },
     });
   }
 
   @UseGuards(EnsureLoginGuard)
-  @Put("update")
+  @Put("update/:id")
   @CacheInvalidate("isAuthenticated")
   async updateOrganization(
+    @Param("id") id: string,
     @Req() req: Request,
     @Body() dto: UpdateOrganizationDto,
   ) {
     return await this.organizationService.updateOrganization({
-      where: { id: req.session.organization.id },
+      where: { id, profileId: req.session.profile.id },
       data: dto,
-    });
-  }
-
-  @UseGuards(EnsureLoginGuard)
-  @Post("upload/photo")
-  @UseInterceptors(FileInterceptor("file"))
-  @CacheInvalidate("isAuthenticated")
-  async uploadPhoto(
-    @UploadedFile() file: Express.Multer.File,
-    @Req() req: Request,
-  ) {
-    return await this.organizationService.updateProfilePhoto({
-      where: { id: req.session.organization.id },
-      file,
     });
   }
 
@@ -171,7 +111,7 @@ export class OrganizationController {
   @Get("log/security/count")
   async countSecurityLogs(@Req() req: Request) {
     return await this.securityAlertService.countSecurityAlerts({
-      organizationId: req.session.organization.id,
+      organizationId: req.session?.organization?.id,
     });
   }
 
@@ -195,7 +135,7 @@ export class OrganizationController {
   @Get("log/authorization/count")
   async countAuthorizationLogs(@Req() req: Request) {
     return await this.authorizationLogService.countAuthorizationLogs({
-      organizationId: req.session.organization.id,
+      organizationId: req.session?.organization?.id,
     });
   }
 
@@ -216,7 +156,7 @@ export class OrganizationController {
   @Get("log/activity/count")
   async countActivityLogs(@Req() req: Request) {
     return await this.activityLogService.countActivityLogs({
-      organizationId: req.session.organization.id,
+      organizationId: req.session?.organization?.id,
     });
   }
 }

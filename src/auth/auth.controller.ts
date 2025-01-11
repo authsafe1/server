@@ -13,7 +13,7 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { SkipThrottle } from "@nestjs/throttler";
-import { Organization } from "@prisma/client";
+import { Profile } from "@prisma/client";
 import { Cache as CacheType } from "cache-manager";
 import { Request, Response } from "express";
 import { Cache, CacheInvalidate } from "../common/decorators/cache.decorator";
@@ -42,20 +42,17 @@ export class AuthController {
     try {
       const { email, password } = body;
 
-      const { redirectTo2Fa, organization } = await this.authService.login(
+      const { redirectTo2Fa, profile } = await this.authService.login(
         email,
         password,
       );
       if (redirectTo2Fa) {
         return res.status(200).json({ redirectTo2Fa: true });
       } else {
-        req.session.organization = {
-          id: organization.id,
-          name: organization.name,
-          domain: organization.domain,
-          email: organization.email,
-          metadata: organization.metadata,
-          Secret: organization.Secret,
+        req.session.profile = {
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
         };
         return res.status(200).json({ message: "Logged in" });
       }
@@ -74,17 +71,14 @@ export class AuthController {
   @Get("google/callback")
   @UseGuards(AuthGuard("google"))
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const organization = await this.authService.googleCallback(
-      (req.user as Organization)?.email,
+    const profile = await this.authService.googleCallback(
+      (req.user as Profile)?.email,
     );
-    if (organization) {
-      req.session.organization = {
-        id: organization.id,
-        name: organization.name,
-        domain: organization.domain,
-        email: organization.email,
-        metadata: organization.metadata,
-        Secret: organization.Secret,
+    if (profile) {
+      req.session.profile = {
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
       };
       return res.redirect(process.env.DASHBOARD_URL);
     } else {

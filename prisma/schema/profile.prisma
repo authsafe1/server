@@ -1,0 +1,27 @@
+model Profile {
+    id                     String   @id @default(uuid())
+    name                   String
+    email                  String   @unique
+    isVerified             Boolean?
+    verificationToken      String?  @unique
+    password               String
+    photo                  String?
+    logo                   String?
+    plan                   Plan     @default(FREE)
+    createdAt              DateTime @default(now())
+    updatedAt              DateTime @updatedAt
+    isTwoFactorAuthEnabled Boolean  @default(false)
+    twoFactorSecret        String?
+
+    Subscription  Subscription?
+    BackupCodes   BackupCode[]
+    Organizations Organization[]
+
+    @@index([email, createdAt, verificationToken])
+}
+
+enum Plan {
+    FREE
+    PROFESSIONAL
+    ENTERPRISE
+}

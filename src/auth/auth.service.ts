@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { Organization } from "@prisma/client";
+import { Profile } from "@prisma/client";
 import argon2 from "argon2";
 import { Queue } from "bullmq";
 import { randomBytes } from "crypto";
@@ -32,7 +32,7 @@ export class AuthService {
     }
   }
 
-  private createEmailBody(body: Organization, url: string) {
+  private createEmailBody(body: Profile, url: string) {
     return `
         <div
   style="font-family: Arial, sans-serif; background: #6a11cb; background: -webkit-linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1)); background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1)); padding: 20px; max-width: 600px; margin: auto; border-radius: 10px;">
@@ -75,25 +75,15 @@ export class AuthService {
 
   async login(email: string, password: string) {
     try {
-      const organization =
-        await this.prismaService.organization.findUniqueOrThrow({
-          where: {
-            email,
-          },
-          include: {
-            Secret: {
-              select: { id: true, privateKey: true },
-            },
-          },
-        });
-      if (await argon2.verify(organization.password, password)) {
-        await this.activityLogService.logActivity(
-          organization.id,
-          "Organization logged in",
-        );
+      const profile = await this.prismaService.profile.findUniqueOrThrow({
+        where: {
+          email,
+        },
+      });
+      if (await argon2.verify(profile.password, password)) {
         return {
-          redirectTo2Fa: organization.isTwoFactorAuthEnabled,
-          organization: organization,
+          redirectTo2Fa: profile.isTwoFactorAuthEnabled,
+          profile,
         };
       } else {
         throw new Error("PASSWORD_MISMATCH");
@@ -111,12 +101,11 @@ export class AuthService {
 
   async sendPasswordResetLink(email: string) {
     try {
-      const organization =
-        await this.prismaService.organization.findUniqueOrThrow({
-          where: {
-            email,
-          },
-        });
+      const profile = await this.prismaService.profile.findUniqueOrThrow({
+        where: {
+          email,
+        },
+      });
 
       const token = (await promisify(randomBytes)(64)).toString("hex");
 
@@ -126,7 +115,7 @@ export class AuthService {
           expiresAt: dayjs(new Date()).add(10, "minutes").toDate(),
           Organization: {
             connect: {
-              id: organization.id,
+              id: profile.id,
             },
           },
         },
@@ -136,9 +125,9 @@ export class AuthService {
 
       this.mailQueue.add(MailAction.SEND, {
         from: { name: process.env.EMAIL_FROM, address: process.env.EMAIL_ID },
-        to: organization.email,
+        to: profile.email,
         subject: "Reset Your Password - Secure Your Account",
-        html: this.createEmailBody(organization, url),
+        html: this.createEmailBody(profile, url),
       });
     } catch (err) {
       if (err.code !== "P2025") {
@@ -149,23 +138,11 @@ export class AuthService {
 
   async googleCallback(email: string) {
     try {
-      const organization = await this.prismaService.organization.findUnique({
+      return await this.prismaService.profile.findUnique({
         where: {
           email,
         },
-        include: {
-          Secret: {
-            select: { id: true, privateKey: true },
-          },
-        },
       });
-      if (organization) {
-        await this.activityLogService.logActivity(
-          organization.id,
-          "Organization logged in",
-        );
-      }
-      return organization;
     } catch {
       throw new InternalServerErrorException();
     }
@@ -189,7 +166,7 @@ export class AuthService {
       const hashedPassword = await argon2.hash(newPassword);
 
       await this.prismaService.$transaction(async prisma => {
-        await prisma.organization.update({
+        await prisma.profile.update({
           where: { id: resetToken.organizationId },
           data: { password: hashedPassword },
         });
@@ -211,10 +188,10 @@ export class AuthService {
 
   async isAuthenticated(session: Request["session"]) {
     try {
-      if (session && session.organization) {
-        return await this.prismaService.organization.findUniqueOrThrow({
+      if (session && session.profile) {
+        return await this.prismaService.profile.findUniqueOrThrow({
           where: {
-            id: session.organization.id,
+            id: session.profile.id,
           },
           select: {
             id: true,
@@ -222,15 +199,7 @@ export class AuthService {
             email: true,
             photo: true,
             plan: true,
-            domain: true,
-            metadata: true,
-            isVerified: true,
-            isTwoFactorAuthEnabled: true,
-            Secret: {
-              select: {
-                publicKey: true,
-              },
-            },
+            Organizations: true,
           },
         });
       } else {

@@ -1,21 +1,15 @@
 model Organization {
-    id                     String   @id @default(uuid())
-    name                   String
-    domain                 String   @unique
-    email                  String   @unique
-    isVerified             Boolean?
-    verificationToken      String?  @unique
-    password               String
-    photo                  String?
-    metadata               Json?
-    logo                   String?
-    plan                   Plan     @default(FREE)
-    createdAt              DateTime @default(now())
-    updatedAt              DateTime @updatedAt
-    isTwoFactorAuthEnabled Boolean  @default(false)
-    twoFactorSecret        String?
+    id        String   @id @default(uuid())
+    name      String
+    domain    String   @unique
+    metadata  Json?
+    plan      Plan     @default(FREE)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-    Subscription     Subscription?
+    profileId String
+    Profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
     Secret           Secret?
     Branding         Branding?
     EmailTemplates   EmailTemplate[]
@@ -24,16 +18,9 @@ model Organization {
     Clients          Client[]
     Roles            Role[]
     Permissions      Permission[]
-    BackupCodes      BackupCode[]
     ActivityLogs     ActivityLog[]
     SecurityAlerts   SecurityAlert[]
     AuthorizationLog AuthorizationLog[]
 
-    @@index([email, domain, createdAt, verificationToken])
-}
-
-enum Plan {
-    FREE
-    PROFESSIONAL
-    ENTERPRISE
+    @@index([domain, createdAt])
 }

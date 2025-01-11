@@ -3,8 +3,8 @@ model BackupCode {
     code   String  @unique
     isUsed Boolean @default(false)
 
-    organizationId String
-    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    profileId String
+    Profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-    @@index([code, organizationId])
+    @@index([code, profileId])
 }
