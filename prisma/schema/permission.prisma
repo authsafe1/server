@@ -1,0 +1,16 @@
+model Permission {
+    id          String   @id @default(uuid())
+    name        String
+    key         String
+    description String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    organizationId String
+    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    Roles   Role[]
+    Clients Client[] @relation("ClientPermissions")
+
+    @@index([name, key, organizationId])
+}

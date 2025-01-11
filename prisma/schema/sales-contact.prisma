@@ -1,0 +1,18 @@
+model SalesContact {
+    id      String       @id @default(uuid())
+    name    String
+    email   String
+    website String?
+    country String?
+    message String
+    status  TicketStatus @default(OPEN)
+
+    createdAt DateTime @default(now())
+}
+
+enum TicketStatus {
+    OPEN
+    IN_PROGRESS
+    RESOLVED
+    UNRESOLVED
+}

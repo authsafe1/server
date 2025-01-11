@@ -1,0 +1,23 @@
+model Subscription {
+    id             String             @id @default(uuid())
+    startDate      DateTime           @default(now())
+    endDate        DateTime?
+    status         SubscriptionStatus @default(ACTIVE)
+    customerId     String?
+    subscriptionId String?
+    amount         Decimal
+    createdAt      DateTime           @default(now())
+    updatedAt      DateTime           @updatedAt
+
+    organizationId String       @unique
+    organization   Organization @relation(fields: [organizationId], references: [id])
+
+    @@index([organizationId, customerId, subscriptionId])
+}
+
+enum SubscriptionStatus {
+    ACTIVE
+    CANCELLED
+    PAST_DUE
+    INCOMPLETE
+}

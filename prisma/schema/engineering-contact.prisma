@@ -1,0 +1,10 @@
+model EngineeringContact {
+    id      String       @id @default(uuid())
+    name    String
+    email   String
+    type    String?      @default("Free")
+    message String
+    status  TicketStatus @default(OPEN)
+
+    createdAt DateTime @default(now())
+}

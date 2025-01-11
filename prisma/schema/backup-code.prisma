@@ -1,0 +1,10 @@
+model BackupCode {
+    id     String  @id @default(uuid())
+    code   String  @unique
+    isUsed Boolean @default(false)
+
+    organizationId String
+    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    @@index([code, organizationId])
+}

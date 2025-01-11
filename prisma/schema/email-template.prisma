@@ -1,0 +1,12 @@
+model EmailTemplate {
+    id      String @id @default(uuid())
+    from    String
+    replyTo String
+    subject String
+    body    Json
+
+    organizationId String       @unique
+    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    @@index([organizationId])
+}

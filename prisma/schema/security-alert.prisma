@@ -1,0 +1,20 @@
+model SecurityAlert {
+    id        String   @id @default(uuid())
+    message   String
+    severity  Severity
+    ip        String?
+    url       String?
+    createdAt DateTime @default(now())
+
+    organizationId String
+    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    @@index([severity, createdAt, organizationId])
+}
+
+enum Severity {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+}
