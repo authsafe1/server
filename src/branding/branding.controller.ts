@@ -17,7 +17,7 @@ import { BrandingService } from "./branding.service";
 export class BrandingController {
   constructor(private readonly brandingService: BrandingService) {}
 
-  @Put("branding/update")
+  @Put("update")
   async updateBranding(@Req() req: Request, @Body() dto: UpdateBrandingDto) {
     return await this.brandingService.updateBranding(
       { organizationId: req.session?.organization?.id },
