@@ -21,7 +21,7 @@ import { CreateProfileDto, UpdateProfileDto } from "../common/dtos/profile.dto";
 import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
 import { ProfileService } from "./profile.service";
 
-@Controller("organization")
+@Controller("profile")
 export class ProfileController {
   constructor(
     private readonly profileService: ProfileService,
@@ -34,7 +34,6 @@ export class ProfileController {
   }
 
   @Post("google/create")
-  //@CacheInvalidate("isAuthenticated")
   async createUserFromGoogle(
     @Body() dto: CreateProfileDto,
     @Req() req: Request,
