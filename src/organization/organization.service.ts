@@ -60,6 +60,60 @@ export class OrganizationService {
     }
   }
 
+  async switchOrganization(id: string, profileId: string) {
+    try {
+      return await this.prismaService.organization.findUniqueOrThrow({
+        where: {
+          id,
+          profileId,
+        },
+        select: {
+          id: true,
+          name: true,
+          domain: true,
+          Secret: { include: { ApiKeys: { select: { token: true } } } },
+          metadata: true,
+        },
+      });
+    } catch (err) {
+      if (err.code === "P2025") {
+        throw new NotFoundException();
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
+  }
+
+  async getAllOrganizations(
+    params: {
+      skip?: number;
+      take?: number;
+      cursor?: Prisma.OrganizationWhereUniqueInput;
+      where?: Prisma.OrganizationWhereInput;
+      orderBy?: Prisma.OrganizationOrderByWithRelationInput;
+    },
+    profileId: string,
+  ) {
+    const { where, ...paramsWithoutWhere } = params;
+    return await this.prismaService.organization.findMany({
+      ...paramsWithoutWhere,
+      where: {
+        ...where,
+        profileId,
+      },
+    });
+  }
+
+  async countOrganizations(where: Prisma.OrganizationWhereInput) {
+    try {
+      return await this.prismaService.organization.count({
+        where,
+      });
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
   async getBranding(where: Prisma.BrandingWhereUniqueInput) {
     try {
       return await this.prismaService.branding.findUniqueOrThrow({
