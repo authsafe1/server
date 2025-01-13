@@ -13,7 +13,6 @@ declare module "express-session" {
       id: string;
       name: string;
       domain: string;
-      email: string;
       Secret: Pick<Secret, "privateKey" | "id">;
       metadata: JsonValue;
     };
