@@ -22,6 +22,7 @@ import {
 } from "../common/dtos/log.dto";
 import {
   CreateOrganizationDto,
+  OrganizationsDto,
   UpdateOrganizationDto,
 } from "../common/dtos/organization.dto";
 import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
@@ -30,6 +31,7 @@ import { AuthorizationLogService } from "../common/modules/log/authorization-log
 import { SecurityAlertService } from "../common/modules/log/security-log.service";
 import { OrganizationService } from "./organization.service";
 
+@UseGuards(EnsureLoginGuard)
 @Controller("organization")
 export class OrganizationController {
   constructor(
@@ -41,6 +43,7 @@ export class OrganizationController {
   ) {}
 
   @Post("create")
+  @CacheInvalidate("isAuthenticated")
   async createUser(@Body() dto: CreateOrganizationDto, @Req() req: Request) {
     return await this.organizationService.createOrganization({
       ...dto,
@@ -52,7 +55,21 @@ export class OrganizationController {
     });
   }
 
-  @UseGuards(EnsureLoginGuard)
+  @Post("all")
+  async findAll(@Body() dto: OrganizationsDto, @Req() req: Request) {
+    return this.organizationService.getAllOrganizations(
+      dto,
+      req.session?.profile?.id,
+    );
+  }
+
+  @Get("count")
+  async getCount(@Req() req: Request) {
+    return this.organizationService.countOrganizations({
+      profileId: req.session?.profile?.id,
+    });
+  }
+
   @Put("update/:id")
   @CacheInvalidate("isAuthenticated")
   async updateOrganization(
@@ -61,17 +78,21 @@ export class OrganizationController {
     @Body() dto: UpdateOrganizationDto,
   ) {
     return await this.organizationService.updateOrganization({
-      where: { id, profileId: req.session.profile.id },
+      where: { id, profileId: req.session?.profile?.id },
       data: dto,
     });
   }
 
-  @UseGuards(EnsureLoginGuard)
-  @Delete("delete")
+  @Delete("delete/:id")
   @CacheInvalidate("isAuthenticated")
-  async deleteOrganization(@Req() req: Request, @Res() res: Response) {
+  async deleteOrganization(
+    @Param("id") id: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
     await this.organizationService.deleteOrganization({
-      id: req.session.organization.id,
+      id,
+      profileId: req.session?.profile?.id,
     });
     if (req.session) {
       req.session.destroy(err => {
@@ -86,7 +107,6 @@ export class OrganizationController {
     }
   }
 
-  @UseGuards(EnsureLoginGuard)
   @Get("log/activity/data")
   async getActivityData(@Req() req: Request) {
     return await this.activityLogService.getUserActivityOverTime(
@@ -94,7 +114,6 @@ export class OrganizationController {
     );
   }
 
-  @UseGuards(EnsureLoginGuard)
   @Post("log/security/all")
   async getAllSecurityLogs(@Req() req: Request, @Body() dto: SecurityAlertDto) {
     const { where, ...params } = dto;
@@ -107,7 +126,6 @@ export class OrganizationController {
     });
   }
 
-  @UseGuards(EnsureLoginGuard)
   @Get("log/security/count")
   async countSecurityLogs(@Req() req: Request) {
     return await this.securityAlertService.countSecurityAlerts({
@@ -115,7 +133,6 @@ export class OrganizationController {
     });
   }
 
-  @UseGuards(EnsureLoginGuard)
   @Post("log/authorization/all")
   async getAllAuthorizationLogs(
     @Req() req: Request,
@@ -131,7 +148,6 @@ export class OrganizationController {
     });
   }
 
-  @UseGuards(EnsureLoginGuard)
   @Get("log/authorization/count")
   async countAuthorizationLogs(@Req() req: Request) {
     return await this.authorizationLogService.countAuthorizationLogs({
@@ -139,7 +155,6 @@ export class OrganizationController {
     });
   }
 
-  @UseGuards(EnsureLoginGuard)
   @Post("log/activity/all")
   async getAllActivityLogs(@Req() req: Request, @Body() dto: ActivityLogDto) {
     const { where, ...params } = dto;
@@ -152,11 +167,38 @@ export class OrganizationController {
     });
   }
 
-  @UseGuards(EnsureLoginGuard)
   @Get("log/activity/count")
   async countActivityLogs(@Req() req: Request) {
     return await this.activityLogService.countActivityLogs({
       organizationId: req.session?.organization?.id,
     });
+  }
+
+  @Get("switch/:id")
+  async getOrganization(@Param("id") id: string, @Req() req: Request) {
+    const organization = await this.organizationService.switchOrganization(
+      id,
+      req.session?.profile?.id,
+    );
+    req.session.organization = {
+      id: organization.id,
+      name: organization.name,
+      domain: organization.domain,
+      Secret: {
+        privateKey: organization.Secret.privateKey,
+        id: organization.Secret.id,
+      },
+      metadata: organization.metadata,
+    };
+    return {
+      id: organization.id,
+      name: organization.name,
+      domain: organization.domain,
+      metadata: organization.metadata,
+      Secret: {
+        publicKey: organization.Secret.publicKey,
+        ApiKeys: organization.Secret.ApiKeys,
+      },
+    };
   }
 }
