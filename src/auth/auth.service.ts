@@ -199,7 +199,26 @@ export class AuthService {
             email: true,
             photo: true,
             plan: true,
-            Organizations: true,
+            isVerified: true,
+            isTwoFactorAuthEnabled: true,
+            Organizations: {
+              select: {
+                id: true,
+                name: true,
+                domain: true,
+                metadata: true,
+                Secret: {
+                  select: {
+                    publicKey: true,
+                    ApiKeys: {
+                      select: {
+                        token: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         });
       } else {

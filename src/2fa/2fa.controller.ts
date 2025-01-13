@@ -26,16 +26,14 @@ export class TwoFAController {
   @Post("enable")
   @CacheInvalidate("isAuthenticated")
   async enableTwoFA(@Req() req: Request) {
-    return await this.twoFAService.enableTwoFactorAuth(
-      req.session.organization.id,
-    );
+    return await this.twoFAService.enableTwoFactorAuth(req.session.profile.id);
   }
 
   @UseGuards(EnsureLoginGuard)
   @Post("disable")
   @CacheInvalidate("isAuthenticated")
   async disableTwoFA(@Req() req: Request) {
-    await this.twoFAService.disableTwoFactorAuth(req.session.organization.id);
+    await this.twoFAService.disableTwoFactorAuth(req.session.profile.id);
     return { message: "2FA disabled" };
   }
 
@@ -45,20 +43,17 @@ export class TwoFAController {
     @Res() res: Response,
     @Body() dto: TwoFaVerifyDto,
   ) {
-    const { isValid, organization } = await this.twoFAService.verifyToken(
+    const { isValid, profile } = await this.twoFAService.verifyToken(
       dto.token,
       dto.email,
     );
     if (!isValid) {
       return res.status(401).json({ message: "Invalid 2FA Token" });
     } else {
-      req.session.organization = {
-        id: organization.id,
-        name: organization.name,
-        email: organization.email,
-        domain: organization.domain,
-        metadata: organization.metadata,
-        Secret: organization.Secret,
+      req.session.profile = {
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
       };
       return res.status(200).json({ message: "2FA Verified" });
     }
@@ -70,16 +65,11 @@ export class TwoFAController {
     @Res() res: Response,
     @Body() dto: TwoFaBackupVerifyDto,
   ) {
-    const { organization } = await this.twoFAService.validateBackupCode(
-      dto.code,
-    );
-    req.session.organization = {
-      id: organization.id,
-      name: organization.name,
-      domain: organization.domain,
-      email: organization.email,
-      metadata: organization.metadata,
-      Secret: organization.Secret,
+    const { profile } = await this.twoFAService.validateBackupCode(dto.code);
+    req.session.profile = {
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
     };
     return res.status(200).json({ message: "Backup Code Verified" });
   }
