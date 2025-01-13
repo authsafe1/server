@@ -13,9 +13,12 @@ model Profile {
     isTwoFactorAuthEnabled Boolean  @default(false)
     twoFactorSecret        String?
 
-    Subscription  Subscription?
-    BackupCodes   BackupCode[]
-    Organizations Organization[]
+    Subscription      Subscription?
+    BackupCodes       BackupCode[]
+    Organizations     Organization[]
+    ActivityLogs      ActivityLog[]
+    SecurityAlerts    SecurityAlert[]
+    AuthorizationLogs AuthorizationLog[]
 
     @@index([email, createdAt, verificationToken])
 }

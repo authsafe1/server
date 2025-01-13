@@ -15,7 +15,7 @@ CREATE TABLE "ActivityLog" (
     "id" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "organizationId" TEXT NOT NULL,
+    "profileId" TEXT NOT NULL,
 
     CONSTRAINT "ActivityLog_pkey" PRIMARY KEY ("id")
 );
@@ -58,7 +58,7 @@ CREATE TABLE "AuthorizationLog" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" TEXT NOT NULL,
     "clientId" TEXT NOT NULL,
-    "organizationId" TEXT NOT NULL,
+    "profileId" TEXT NOT NULL,
 
     CONSTRAINT "AuthorizationLog_pkey" PRIMARY KEY ("id")
 );
@@ -244,7 +244,7 @@ CREATE TABLE "SecurityAlert" (
     "ip" TEXT,
     "url" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "organizationId" TEXT NOT NULL,
+    "profileId" TEXT NOT NULL,
 
     CONSTRAINT "SecurityAlert_pkey" PRIMARY KEY ("id")
 );
@@ -314,7 +314,7 @@ CREATE TABLE "_PermissionToRole" (
 );
 
 -- CreateIndex
-CREATE INDEX "ActivityLog_organizationId_createdAt_idx" ON "ActivityLog"("organizationId", "createdAt");
+CREATE INDEX "ActivityLog_profileId_createdAt_idx" ON "ActivityLog"("profileId", "createdAt");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ApiKey_token_key" ON "ApiKey"("token");
@@ -395,7 +395,7 @@ CREATE UNIQUE INDEX "Secret_organizationId_key" ON "Secret"("organizationId");
 CREATE INDEX "Secret_privateKey_publicKey_organizationId_idx" ON "Secret"("privateKey", "publicKey", "organizationId");
 
 -- CreateIndex
-CREATE INDEX "SecurityAlert_severity_createdAt_organizationId_idx" ON "SecurityAlert"("severity", "createdAt", "organizationId");
+CREATE INDEX "SecurityAlert_severity_createdAt_profileId_idx" ON "SecurityAlert"("severity", "createdAt", "profileId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Subscription_profileId_key" ON "Subscription"("profileId");
@@ -422,7 +422,7 @@ CREATE INDEX "_ClientPermissions_B_index" ON "_ClientPermissions"("B");
 CREATE INDEX "_PermissionToRole_B_index" ON "_PermissionToRole"("B");
 
 -- AddForeignKey
-ALTER TABLE "ActivityLog" ADD CONSTRAINT "ActivityLog_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ActivityLog" ADD CONSTRAINT "ActivityLog_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ApiKey" ADD CONSTRAINT "ApiKey_secretId_fkey" FOREIGN KEY ("secretId") REFERENCES "Secret"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -440,7 +440,7 @@ ALTER TABLE "AuthorizationLog" ADD CONSTRAINT "AuthorizationLog_userId_fkey" FOR
 ALTER TABLE "AuthorizationLog" ADD CONSTRAINT "AuthorizationLog_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AuthorizationLog" ADD CONSTRAINT "AuthorizationLog_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AuthorizationLog" ADD CONSTRAINT "AuthorizationLog_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "BackupCode" ADD CONSTRAINT "BackupCode_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -476,7 +476,7 @@ ALTER TABLE "Role" ADD CONSTRAINT "Role_organizationId_fkey" FOREIGN KEY ("organ
 ALTER TABLE "Secret" ADD CONSTRAINT "Secret_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SecurityAlert" ADD CONSTRAINT "SecurityAlert_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "SecurityAlert" ADD CONSTRAINT "SecurityAlert_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

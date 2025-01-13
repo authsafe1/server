@@ -16,19 +16,11 @@ import { Cache } from "cache-manager";
 import { Request, Response } from "express";
 import { CacheInvalidate } from "../common/decorators/cache.decorator";
 import {
-  ActivityLogDto,
-  AuthorizationLogDto,
-  SecurityAlertDto,
-} from "../common/dtos/log.dto";
-import {
   CreateOrganizationDto,
   OrganizationsDto,
   UpdateOrganizationDto,
 } from "../common/dtos/organization.dto";
 import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
-import { ActivityLogService } from "../common/modules/log/activity-log.service";
-import { AuthorizationLogService } from "../common/modules/log/authorization-log.service";
-import { SecurityAlertService } from "../common/modules/log/security-log.service";
 import { OrganizationService } from "./organization.service";
 
 @UseGuards(EnsureLoginGuard)
@@ -36,9 +28,6 @@ import { OrganizationService } from "./organization.service";
 export class OrganizationController {
   constructor(
     private readonly organizationService: OrganizationService,
-    private readonly securityAlertService: SecurityAlertService,
-    private readonly authorizationLogService: AuthorizationLogService,
-    private readonly activityLogService: ActivityLogService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -105,73 +94,6 @@ export class OrganizationController {
     } else {
       return { message: "Organization Deleted" };
     }
-  }
-
-  @Get("log/activity/data")
-  async getActivityData(@Req() req: Request) {
-    return await this.activityLogService.getUserActivityOverTime(
-      req.session?.organization?.id,
-    );
-  }
-
-  @Post("log/security/all")
-  async getAllSecurityLogs(@Req() req: Request, @Body() dto: SecurityAlertDto) {
-    const { where, ...params } = dto;
-    return await this.securityAlertService.getAllSecurityAlerts({
-      where: {
-        ...where,
-        organizationId: req.session?.organization?.id,
-      },
-      ...params,
-    });
-  }
-
-  @Get("log/security/count")
-  async countSecurityLogs(@Req() req: Request) {
-    return await this.securityAlertService.countSecurityAlerts({
-      organizationId: req.session?.organization?.id,
-    });
-  }
-
-  @Post("log/authorization/all")
-  async getAllAuthorizationLogs(
-    @Req() req: Request,
-    @Body() dto: AuthorizationLogDto,
-  ) {
-    const { where, ...params } = dto;
-    return await this.authorizationLogService.getAllAuthorizationLogs({
-      where: {
-        ...where,
-        organizationId: req.session?.organization?.id,
-      },
-      ...params,
-    });
-  }
-
-  @Get("log/authorization/count")
-  async countAuthorizationLogs(@Req() req: Request) {
-    return await this.authorizationLogService.countAuthorizationLogs({
-      organizationId: req.session?.organization?.id,
-    });
-  }
-
-  @Post("log/activity/all")
-  async getAllActivityLogs(@Req() req: Request, @Body() dto: ActivityLogDto) {
-    const { where, ...params } = dto;
-    return await this.activityLogService.getAllActivityLogs({
-      where: {
-        ...where,
-        organizationId: req.session?.organization?.id,
-      },
-      ...params,
-    });
-  }
-
-  @Get("log/activity/count")
-  async countActivityLogs(@Req() req: Request) {
-    return await this.activityLogService.countActivityLogs({
-      organizationId: req.session?.organization?.id,
-    });
   }
 
   @Get("switch/:id")

@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Inject,
   Post,
   Put,
@@ -16,9 +17,17 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Cache } from "cache-manager";
 import { Request, Response } from "express";
+import {
+  ActivityLogDto,
+  AuthorizationLogDto,
+  SecurityAlertDto,
+} from "src/common/dtos/log.dto";
+import { AuthorizationLogService } from "src/common/modules/log/authorization-log.service";
+import { SecurityAlertService } from "src/common/modules/log/security-log.service";
 import { CacheInvalidate } from "../common/decorators/cache.decorator";
 import { CreateProfileDto, UpdateProfileDto } from "../common/dtos/profile.dto";
 import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
+import { ActivityLogService } from "../common/modules/log/activity-log.service";
 import { ProfileService } from "./profile.service";
 
 @Controller("profile")
@@ -26,6 +35,9 @@ export class ProfileController {
   constructor(
     private readonly profileService: ProfileService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly securityAlertService: SecurityAlertService,
+    private readonly authorizationLogService: AuthorizationLogService,
+    private readonly activityLogService: ActivityLogService,
   ) {}
 
   @Post("create")
@@ -95,5 +107,79 @@ export class ProfileController {
     } else {
       return { message: "Profile Deleted" };
     }
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Get("log/activity/data")
+  async getActivityData(@Req() req: Request) {
+    return await this.activityLogService.getUserActivityOverTime(
+      req.session?.profile?.id,
+    );
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Post("log/security/all")
+  async getAllSecurityLogs(@Req() req: Request, @Body() dto: SecurityAlertDto) {
+    const { where, ...params } = dto;
+    return await this.securityAlertService.getAllSecurityAlerts({
+      where: {
+        ...where,
+        profileId: req.session?.profile?.id,
+      },
+      ...params,
+    });
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Get("log/security/count")
+  async countSecurityLogs(@Req() req: Request) {
+    return await this.securityAlertService.countSecurityAlerts({
+      profileId: req.session?.profile?.id,
+    });
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Post("log/authorization/all")
+  async getAllAuthorizationLogs(
+    @Req() req: Request,
+    @Body() dto: AuthorizationLogDto,
+  ) {
+    const { where, ...params } = dto;
+    return await this.authorizationLogService.getAllAuthorizationLogs({
+      where: {
+        ...where,
+        profileId: req.session?.profile?.id,
+      },
+      ...params,
+    });
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Get("log/authorization/count")
+  async countAuthorizationLogs(@Req() req: Request) {
+    return await this.authorizationLogService.countAuthorizationLogs({
+      profileId: req.session?.profile?.id,
+    });
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Post("log/activity/all")
+  async getAllActivityLogs(@Req() req: Request, @Body() dto: ActivityLogDto) {
+    const { where, ...params } = dto;
+    return await this.activityLogService.getAllActivityLogs({
+      where: {
+        ...where,
+        profileId: req.session?.profile?.id,
+      },
+      ...params,
+    });
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Get("log/activity/count")
+  async countActivityLogs(@Req() req: Request) {
+    return await this.activityLogService.countActivityLogs({
+      profileId: req.session?.profile?.id,
+    });
   }
 }

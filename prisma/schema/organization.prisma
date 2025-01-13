@@ -10,17 +10,14 @@ model Organization {
     profileId String
     Profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-    Secret           Secret?
-    Branding         Branding?
-    EmailTemplates   EmailTemplate[]
-    Webhooks         Webhook[]
-    Users            User[]
-    Clients          Client[]
-    Roles            Role[]
-    Permissions      Permission[]
-    ActivityLogs     ActivityLog[]
-    SecurityAlerts   SecurityAlert[]
-    AuthorizationLog AuthorizationLog[]
+    Secret         Secret?
+    Branding       Branding?
+    EmailTemplates EmailTemplate[]
+    Webhooks       Webhook[]
+    Users          User[]
+    Clients        Client[]
+    Roles          Role[]
+    Permissions    Permission[]
 
     @@index([domain, createdAt])
 }

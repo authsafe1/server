@@ -50,7 +50,7 @@ export class OrganizationService {
       });
 
       await this.activityLogService.logActivity(
-        organization.id,
+        organization.profileId,
         "Organization Created",
       );
 
@@ -168,7 +168,7 @@ export class OrganizationService {
         organization,
       });
       await this.activityLogService.logActivity(
-        organization.id,
+        organization.profileId,
         "Organization updated",
       );
       return organization;
@@ -186,7 +186,7 @@ export class OrganizationService {
         organization,
       });
       await this.activityLogService.logActivity(
-        organization.id,
+        organization.profileId,
         "Organization Deleted",
       );
       return organization;

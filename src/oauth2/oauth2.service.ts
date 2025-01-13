@@ -53,7 +53,7 @@ export class OAuth2Service {
     redirectUri: string,
     scope: string[],
     nonce: string,
-    organizationId: string,
+    profileId: string,
   ) {
     // Validate client and redirect URI
     const client = await this.prismaService.client.findUnique({
@@ -82,27 +82,18 @@ export class OAuth2Service {
         },
       },
     });
-    await this.prismaService.authorizationLog.create({
-      data: {
-        action: "Authorization Code granted",
-        User: {
-          connect: { id: userId },
-        },
-        Client: {
-          connect: { id: clientId },
-        },
-        Organization: {
-          connect: {
-            id: organizationId,
-          },
-        },
-      },
-    });
 
     await this.authorizationLogService.logAuthorization(
       userId,
       clientId,
-      organizationId,
+      profileId,
+      "Authorization code created",
+    );
+
+    await this.authorizationLogService.logAuthorization(
+      userId,
+      clientId,
+      profileId,
       "Authorization code created",
     );
     return code;
@@ -188,7 +179,7 @@ export class OAuth2Service {
     await this.authorizationLogService.logAuthorization(
       authCode.userId,
       authCode.clientId,
-      authCode.User.organizationId,
+      authCode.User.Organization.profileId,
       "Token exchanged for Code",
     );
 

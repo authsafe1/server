@@ -3,8 +3,8 @@ model ActivityLog {
     description String
     createdAt   DateTime @default(now())
 
-    organizationId String
-    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    profileId String
+    Profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-    @@index([organizationId, createdAt])
+    @@index([profileId, createdAt])
 }

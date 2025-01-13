@@ -31,7 +31,7 @@ export class SecurityAlertService {
   async createAlert(
     message: string,
     severity: Severity,
-    organizationId: string,
+    profileId: string,
     ip?: string,
     url?: string,
   ) {
@@ -41,7 +41,7 @@ export class SecurityAlertService {
         severity,
         ip,
         url,
-        Organization: { connect: { id: organizationId } },
+        Profile: { connect: { id: profileId } },
       },
     });
   }

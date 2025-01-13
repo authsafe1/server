@@ -323,9 +323,14 @@ export class UserService {
         },
         where,
         omit: { password: true },
+        include: {
+          Organization: {
+            select: { profileId: true },
+          },
+        },
       });
       await this.activityLogService.logActivity(
-        user.organizationId,
+        user.Organization.profileId,
         "User updated",
       );
       await this.eventEmitter.emitAsync("user.updated", { user });
@@ -354,9 +359,14 @@ export class UserService {
           },
         },
         omit: { password: true },
+        include: {
+          Organization: {
+            select: { profileId: true },
+          },
+        },
       });
       await this.activityLogService.logActivity(
-        user.organizationId,
+        user.Organization.profileId,
         "User role assigned",
       );
       await this.eventEmitter.emitAsync("user.role.assigned", { user });
@@ -373,9 +383,14 @@ export class UserService {
       const user = await this.prismaService.user.delete({
         where,
         omit: { password: true },
+        include: {
+          Organization: {
+            select: { profileId: true },
+          },
+        },
       });
       await this.activityLogService.logActivity(
-        user.organizationId,
+        user.Organization.profileId,
         "User deleted",
       );
       await this.eventEmitter.emitAsync("user.deleted", { user });

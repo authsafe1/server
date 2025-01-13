@@ -73,9 +73,14 @@ export class ClientService {
             },
           },
         },
+        include: {
+          Organization: {
+            select: { profileId: true },
+          },
+        },
       });
       await this.activityLogService.logActivity(
-        organizationId,
+        client.Organization.profileId,
         "New client created",
       );
       await this.eventEmitter.emitAsync("application.created", { client });
@@ -94,12 +99,17 @@ export class ClientService {
   }): Promise<Client> {
     const { where, data } = params;
     try {
-      const client = this.prismaService.client.update({
+      const client = await this.prismaService.client.update({
         data,
         where,
+        include: {
+          Organization: {
+            select: { profileId: true },
+          },
+        },
       });
       await this.activityLogService.logActivity(
-        where.organizationId as string,
+        client.Organization.profileId,
         "Client updated",
       );
       await this.eventEmitter.emitAsync("application.updated", { client });
@@ -111,11 +121,16 @@ export class ClientService {
 
   async deleteClient(where: Prisma.ClientWhereUniqueInput): Promise<Client> {
     try {
-      const client = this.prismaService.client.delete({
+      const client = await this.prismaService.client.delete({
         where,
+        include: {
+          Organization: {
+            select: { profileId: true },
+          },
+        },
       });
       await this.activityLogService.logActivity(
-        where.organizationId as string,
+        client.Organization.profileId,
         "Client deleted",
       );
       await this.eventEmitter.emitAsync("application.deleted", { client });

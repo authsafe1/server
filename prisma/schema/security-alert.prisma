@@ -6,10 +6,10 @@ model SecurityAlert {
     url       String?
     createdAt DateTime @default(now())
 
-    organizationId String
-    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    profileId String
+    Profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-    @@index([severity, createdAt, organizationId])
+    @@index([severity, createdAt, profileId])
 }
 
 enum Severity {

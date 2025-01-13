@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { PassportModule } from "@nestjs/passport";
-import { ActivityLogService } from "../common/modules/log/activity-log.service";
+import { LogModule } from "src/common/modules/log/log.module";
 import { PrismaModule } from "../common/modules/prisma/prisma.module";
 import { QueueModule } from "../common/modules/queue/queue.module";
 import { StrategyModule } from "../common/modules/strategy/strategy.module";
@@ -12,9 +12,10 @@ import { AuthService } from "./auth.service";
     QueueModule,
     PrismaModule,
     StrategyModule,
+    LogModule,
     PassportModule.register({ defaultStrategy: "google" }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, ActivityLogService],
+  providers: [AuthService],
 })
 export class AuthModule {}

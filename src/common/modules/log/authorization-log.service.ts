@@ -9,17 +9,17 @@ export class AuthorizationLogService {
   async logAuthorization(
     userId: string,
     clientId: string,
-    organizationId: string,
+    profileId: string,
     action: string,
     ip?: string,
   ) {
     return await this.prismaService.authorizationLog.create({
       data: {
-        userId,
-        clientId,
-        organizationId,
         action,
         ip,
+        User: { connect: { id: userId } },
+        Client: { connect: { id: clientId } },
+        Profile: { connect: { id: profileId } },
       },
     });
   }
