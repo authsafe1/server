@@ -27,34 +27,25 @@ export class EnsureLoginGuard implements CanActivate {
           },
           include: {
             Secret: {
-              include: { Organization: true },
+              include: { Organization: { include: { Profile: true } } },
             },
           },
         });
-        req.session.organization = {
-          id: apiKey.Secret.Organization.id,
-          name: apiKey.Secret.Organization.name,
-          domain: apiKey.Secret.Organization.domain,
-          email: apiKey.Secret.Organization.email,
-          Secret: {
-            id: apiKey.Secret.id,
-            privateKey: apiKey.Secret.privateKey,
-          },
-          metadata: apiKey.Secret.Organization.metadata,
+        req.session.profile = {
+          id: apiKey.Secret.Organization.Profile.id,
+          name: apiKey.Secret.Organization.Profile.name,
+          email: apiKey.Secret.Organization.Profile.email,
         };
         return true;
-      } else if (req.session && req.session.organization) {
-        const organization =
-          await this.prismaService.organization.findUniqueOrThrow({
-            where: {
-              id: req.session.organization.id,
-            },
-            include: {
-              Secret: { select: { id: true, privateKey: true } },
-            },
-            omit: { password: true, twoFactorSecret: true },
-          });
-        req.user = organization;
+      } else if (req.session && req.session.profile) {
+        const profile = await this.prismaService.profile.findUniqueOrThrow({
+          where: {
+            id: req.session.profile.id,
+          },
+
+          omit: { password: true, twoFactorSecret: true },
+        });
+        req.user = profile;
         return true;
       } else {
         return false;
