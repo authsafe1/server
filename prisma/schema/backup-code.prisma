@@ -1,0 +1,10 @@
+model BackupCode {
+    id     String  @id @default(uuid())
+    code   String  @unique
+    isUsed Boolean @default(false)
+
+    profileId String
+    Profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+    @@index([code, profileId])
+}

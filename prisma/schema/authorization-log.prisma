@@ -1,0 +1,17 @@
+model AuthorizationLog {
+    id        String   @id @default(uuid())
+    action    String
+    ip        String?
+    createdAt DateTime @default(now())
+
+    userId String
+    User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    clientId String
+    Client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+    profileId String
+    Profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+    @@index([userId, clientId, createdAt])
+}

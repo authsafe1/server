@@ -29,21 +29,21 @@ export class ActivityLogService {
     }
   }
 
-  async logActivity(organizationId: string, description: string) {
+  async logActivity(profileId: string, description: string) {
     return await this.prismaService.activityLog.create({
       data: {
         description,
-        Organization: {
-          connect: { id: organizationId },
+        Profile: {
+          connect: { id: profileId },
         },
       },
     });
   }
 
-  async getUserActivityOverTime(organizationId: string) {
+  async getUserActivityOverTime(profileId: string) {
     try {
       const activities = await this.prismaService.activityLog.findMany({
-        where: { organizationId },
+        where: { profileId },
         select: {
           createdAt: true,
         },

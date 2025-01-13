@@ -21,11 +21,11 @@ export class ErrorFilter implements ExceptionFilter {
 
     if (status >= HttpStatus.BAD_REQUEST) {
       const severity = this.determineSeverity(status);
-      if (request.session.organization) {
+      if (request.session.profile) {
         await this.securityAlertService.createAlert(
           exception.message,
           severity,
-          request.session.organization.id,
+          request.session.profile.id,
           request.ip ||
             (request.headers["x-forwarded-for"] as string) ||
             (request.socket.remoteAddress as string),

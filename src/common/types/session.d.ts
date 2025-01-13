@@ -4,11 +4,15 @@ import "express-session";
 
 declare module "express-session" {
   interface SessionData {
+    profile: {
+      id: string;
+      name: string;
+      email: string;
+    };
     organization: {
       id: string;
       name: string;
       domain: string;
-      email: string;
       Secret: Pick<Secret, "privateKey" | "id">;
       metadata: JsonValue;
     };

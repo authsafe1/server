@@ -1,69 +1,52 @@
+import { Prisma } from "@prisma/client";
 import { JsonValue } from "@prisma/client/runtime/library";
-import { Transform } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import {
-  IsEmail,
-  IsHexColor,
-  IsIn,
+  IsInt,
   IsObject,
   IsOptional,
   IsString,
-  IsUrl,
   Matches,
-  MinLength,
+  Min,
 } from "class-validator";
+
+export class OrganizationsDto {
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Type(() => Number)
+  skip?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Type(() => Number)
+  take?: number;
+
+  @IsOptional()
+  @IsObject()
+  cursor?: Prisma.OrganizationWhereUniqueInput;
+
+  @IsOptional()
+  @IsObject()
+  where?: Prisma.OrganizationWhereInput;
+
+  @IsOptional()
+  @IsObject()
+  orderBy?: Prisma.OrganizationOrderByWithRelationInput;
+}
 
 export class CreateOrganizationDto {
   @IsString()
   name: string;
 
-  @IsEmail()
-  @Transform(params => params.value.toLowerCase())
-  email: string;
-
+  @IsString()
   @Matches(
     /(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/g,
     { message: "Must be a valid domain name" },
   )
   @Transform(params => params.value.toLowerCase())
   domain: string;
-
-  @IsString()
-  @MinLength(6)
-  password: string;
-}
-
-export class UpdateBranding {
-  @IsString()
-  @IsUrl()
-  @IsOptional()
-  logo?: string;
-
-  @IsString()
-  @IsUrl()
-  @IsOptional()
-  backgroundImage?: string;
-
-  @IsString()
-  @IsOptional()
-  @IsIn(["light", "dark"])
-  theme?: "light" | "dark";
-
-  @IsString()
-  @IsOptional()
-  header?: string;
-
-  @IsString()
-  @IsOptional()
-  subHeader?: string;
-
-  @IsString()
-  @IsOptional()
-  buttonText?: string;
-
-  @IsString()
-  @IsHexColor()
-  @IsOptional()
-  primaryColor?: string;
 }
 
 export class UpdateOrganizationDto {
@@ -72,22 +55,12 @@ export class UpdateOrganizationDto {
   name?: string;
 
   @IsOptional()
-  @IsEmail()
-  @Transform(params => params.value.toLowerCase())
-  email?: string;
-
-  @IsOptional()
   @Matches(
     /(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/g,
     { message: "Must be a valid domain name" },
   )
   @Transform(params => params.value.toLowerCase())
   domain?: string;
-
-  @IsOptional()
-  @IsString()
-  @MinLength(6)
-  password?: string;
 
   @IsOptional()
   @IsObject()

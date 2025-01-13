@@ -1,7 +1,7 @@
-import { Client, Organization } from "@prisma/client";
+import { Client, Profile } from "@prisma/client";
 import { OAuth2 } from "oauth2orize";
 
-type PartialUser = Pick<Organization, "id" | "name" | "email" | "domain">;
+type PartialUser = Pick<Profile, "id" | "name" | "email">;
 
 declare global {
   namespace Express {

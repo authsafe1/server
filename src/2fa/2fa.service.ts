@@ -11,17 +11,16 @@ import { PrismaService } from "../common/modules/prisma/prisma.service";
 export class TwoFAService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async enableTwoFactorAuth(organizationId: string) {
+  async enableTwoFactorAuth(profileId: string) {
     try {
       const secret = authenticator.generateSecret();
-      const organization =
-        await this.prismaService.organization.findUniqueOrThrow({
-          where: {
-            id: organizationId,
-          },
-        });
+      const profile = await this.prismaService.profile.findUniqueOrThrow({
+        where: {
+          id: profileId,
+        },
+      });
       const otpAuthUrl = authenticator.keyuri(
-        organization.email,
+        profile.email,
         "AuthSafe",
         secret,
       );
@@ -34,12 +33,12 @@ export class TwoFAService {
         await prisma.backupCode.createMany({
           data: backupCodes.map(code => ({
             code,
-            organizationId,
+            profileId,
           })),
         });
 
-        await prisma.organization.update({
-          where: { id: organizationId },
+        await prisma.profile.update({
+          where: { id: profileId },
           data: {
             twoFactorSecret: secret,
             isTwoFactorAuthEnabled: true,
@@ -56,16 +55,16 @@ export class TwoFAService {
     }
   }
 
-  async disableTwoFactorAuth(organizationId: string) {
+  async disableTwoFactorAuth(profileId: string) {
     return await this.prismaService.$transaction(async prisma => {
       await prisma.backupCode.deleteMany({
         where: {
-          organizationId,
+          profileId,
         },
       });
 
-      return await prisma.organization.update({
-        where: { id: organizationId },
+      return await prisma.profile.update({
+        where: { id: profileId },
         data: {
           isTwoFactorAuthEnabled: false,
           twoFactorSecret: null,
@@ -76,21 +75,19 @@ export class TwoFAService {
 
   async verifyToken(token: string, email: string) {
     try {
-      const organization =
-        await this.prismaService.organization.findUniqueOrThrow({
-          where: {
-            email,
-          },
-          include: { Secret: { select: { id: true, privateKey: true } } },
-        });
+      const profile = await this.prismaService.profile.findUniqueOrThrow({
+        where: {
+          email,
+        },
+      });
       const isValid = authenticator.verify({
         token,
-        secret: organization.twoFactorSecret,
+        secret: profile.twoFactorSecret,
       });
-      return { isValid, organization };
+      return { isValid, profile };
     } catch (err) {
       if (err.code === "P2025") {
-        throw new UnauthorizedException("Organization invalid");
+        throw new UnauthorizedException("Profile invalid");
       }
       throw new InternalServerErrorException();
     }
@@ -103,17 +100,14 @@ export class TwoFAService {
           code,
           isUsed: false,
         },
-        include: {
-          Organization: {
-            include: { Secret: { select: { id: true, privateKey: true } } },
-          },
-        },
+        include: { Profile: true },
       });
       await this.prismaService.backupCode.update({
         where: { id: backupCode.id },
         data: { isUsed: true },
+        include: { Profile: true },
       });
-      return { organization: backupCode.Organization };
+      return { profile: backupCode.Profile };
     } catch (err) {
       if (err.code === "P2025") {
         throw new UnauthorizedException("Backup code not found");

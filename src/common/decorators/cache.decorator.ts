@@ -12,10 +12,10 @@ import { Request } from "express";
 export class OrganizationSpecificCacheInterceptor extends CacheInterceptor {
   trackBy(context: ExecutionContext): string {
     const request = context.switchToHttp().getRequest<Request>();
-    const organizationId = request.session?.organization?.id;
+    const profileId = request.session?.profile?.id;
     const keyPrefix = context.getHandler().name || "cache_key";
 
-    return `${keyPrefix}_organization_${organizationId}`;
+    return `${keyPrefix}_profile_${profileId}`;
   }
 }
 
@@ -48,7 +48,7 @@ export function CacheInvalidate(handlerName: string): MethodDecorator {
 
     descriptor.value = async function (...args: any[]) {
       const request: Request = args.find(
-        arg => arg && arg.session && arg.session?.organization?.id,
+        arg => arg && arg.session && arg.session?.profile?.id,
       );
       if (!request) {
         throw new InternalServerErrorException(
@@ -57,8 +57,8 @@ export function CacheInvalidate(handlerName: string): MethodDecorator {
       }
 
       const result = await originalMethod.apply(this, args);
-      const organizationId = request.session?.organization?.id;
-      const cacheKey = `${handlerName}_organization_${organizationId}`;
+      const profileId = request.session?.profile?.id;
+      const cacheKey = `${handlerName}_profile_${profileId}`;
 
       const cacheManager = this.cacheManager as CacheType;
       await cacheManager.del(cacheKey);

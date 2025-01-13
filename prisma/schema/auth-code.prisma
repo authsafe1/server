@@ -1,0 +1,18 @@
+model AuthorizationCode {
+    id          String   @id @default(uuid())
+    code        String   @unique @default(cuid())
+    redirectUri String
+    scope       String[]
+    state       String?
+    nonce       String?
+    createdAt   DateTime @default(now())
+    expiresAt   DateTime
+
+    clientId String
+    Client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+    userId String
+    User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([code, clientId, userId, expiresAt])
+}

@@ -68,7 +68,7 @@ export class CleanupQueueProcessor extends WorkerHost {
 
   private async clearUnverifiedOrganizations() {
     const tenDaysAgo = dayjs().subtract(10, "days").toDate();
-    const tempUser = await this.prisma.organization.deleteMany({
+    const tempUser = await this.prisma.profile.deleteMany({
       where: {
         AND: [{ isVerified: false }, { createdAt: { lte: tenDaysAgo } }],
       },

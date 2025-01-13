@@ -1,0 +1,14 @@
+model Webhook {
+    id          String   @id @default(uuid())
+    name        String
+    url         String
+    description String?
+    events      String[]
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    organizationId String
+    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    @@index([url, events])
+}

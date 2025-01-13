@@ -1,0 +1,19 @@
+model Client {
+    id          String   @id @default(uuid())
+    name        String
+    secret      String   @default(cuid())
+    redirectUri String?
+    grant       String   @default("code")
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    organizationId String
+    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    Permissions        Permission[]        @relation("ClientPermissions")
+    AuthorizationCodes AuthorizationCode[]
+    RefreshTokens      RefreshToken[]
+    AuthorizationLog   AuthorizationLog[]
+
+    @@index([organizationId, createdAt, name])
+}

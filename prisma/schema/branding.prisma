@@ -1,0 +1,13 @@
+model Branding {
+    id              String @id @default(uuid())
+    logo            String
+    theme           String
+    backgroundImage String
+    header          String
+    subHeader       String
+    primaryColor    String
+    buttonText      String
+
+    organizationId String       @unique
+    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}

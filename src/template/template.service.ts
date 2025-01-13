@@ -65,9 +65,14 @@ export class TemplateService {
             connect: { id: organizationId },
           },
         },
+        include: {
+          Organization: {
+            select: { profileId: true },
+          },
+        },
       });
       await this.activityLogService.logActivity(
-        organizationId,
+        template.Organization.profileId,
         "Email Template created",
       );
       await this.eventEmitter.emitAsync("template.created", { template });
@@ -85,9 +90,14 @@ export class TemplateService {
       const template = await this.prismaService.emailTemplate.update({
         where,
         data,
+        include: {
+          Organization: {
+            select: { profileId: true },
+          },
+        },
       });
       await this.activityLogService.logActivity(
-        template.organizationId,
+        template.Organization.profileId,
         "Email Template updated",
       );
       await this.eventEmitter.emitAsync("template.updated", { template });
@@ -101,9 +111,14 @@ export class TemplateService {
     try {
       const template = await this.prismaService.emailTemplate.delete({
         where,
+        include: {
+          Organization: {
+            select: { profileId: true },
+          },
+        },
       });
       await this.activityLogService.logActivity(
-        template.organizationId,
+        template.Organization.profileId,
         "Email Template deleted",
       );
       await this.eventEmitter.emitAsync("template.deleted", { template });

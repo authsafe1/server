@@ -11,6 +11,7 @@ import { TwoFAModule } from "./2fa/2fa.module";
 import { ApiKeyModule } from "./apiKey/apiKey.module";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
+import { BrandingModule } from "./branding/branding.module";
 import { ClientModule } from "./client/client.module";
 import { redis } from "./common/config/redis.config";
 import { ErrorFilter } from "./common/filters/error.filter";
@@ -22,6 +23,7 @@ import { HealthModule } from "./health/health.module";
 import { OAuth2Module } from "./oauth2/oauth2.module";
 import { OrganizationModule } from "./organization/organization.module";
 import { PermissionModule } from "./permission/permission.module";
+import { ProfileModule } from "./profile/profile.module";
 import { RoleModule } from "./role/role.module";
 import { TemplateModule } from "./template/template.module";
 import { UserModule } from "./user/user.module";
@@ -62,6 +64,8 @@ import { WebhookModule } from "./webhook/webhook.module";
       ],
     }),
     ScheduleModule.forRoot(),
+    ProfileModule,
+    BrandingModule,
     TemplateModule,
     ListenerModule,
     OrganizationModule,

@@ -1,0 +1,20 @@
+model SecurityAlert {
+    id        String   @id @default(uuid())
+    message   String
+    severity  Severity
+    ip        String?
+    url       String?
+    createdAt DateTime @default(now())
+
+    profileId String
+    Profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+    @@index([severity, createdAt, profileId])
+}
+
+enum Severity {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+}

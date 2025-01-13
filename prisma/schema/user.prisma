@@ -1,0 +1,25 @@
+model User {
+    id                     String   @id @default(uuid())
+    email                  String   @unique
+    name                   String?
+    password               String?
+    isVerified             Boolean?
+    verificationToken      String?  @unique
+    isTwoFactorAuthEnabled Boolean  @default(false)
+    twoFactorSecret        String?
+    createdAt              DateTime @default(now())
+    updatedAt              DateTime @updatedAt
+
+    organizationId String
+    Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    roleId String?
+    Role   Role?   @relation(fields: [roleId], references: [id])
+
+    AuthorizationCodes  AuthorizationCode[]
+    PasswordResetTokens PasswordResetToken[]
+    RefreshTokens       RefreshToken[]
+    AuthorizationLogs   AuthorizationLog[]
+
+    @@index([email, createdAt, organizationId, roleId, verificationToken])
+}
