@@ -195,8 +195,6 @@ export class ProfileService {
       const { name, email, password } = unhashedData;
       const digest = await argon2.hash(password);
 
-      //const apiKey = await this.generateApiKey();
-
       return await this.prismaService.profile.create({
         data: {
           name,
