@@ -1,10 +1,15 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from "@nestjs/common";
 import { Prisma, Severity } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class SecurityAlertService {
   constructor(private readonly prismaService: PrismaService) {}
+  private readonly logger = new Logger(SecurityAlertService.name);
 
   async getAllSecurityAlerts(params: {
     skip?: number;
@@ -35,15 +40,19 @@ export class SecurityAlertService {
     ip?: string,
     url?: string,
   ) {
-    return this.prismaService.securityAlert.create({
-      data: {
-        message,
-        severity,
-        ip,
-        url,
-        Profile: { connect: { id: profileId } },
-      },
-    });
+    try {
+      return this.prismaService.securityAlert.create({
+        data: {
+          message,
+          severity,
+          ip,
+          url,
+          Profile: { connect: { id: profileId } },
+        },
+      });
+    } catch (err) {
+      this.logger.error(err);
+    }
   }
 
   async getAlertCount(where: Prisma.SecurityAlertWhereInput) {
