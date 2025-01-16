@@ -34,8 +34,11 @@ export class WebhookController {
   }
 
   @Post("all")
-  async findAll(@Body() dto: WebhooksDto) {
-    return this.webhookService.getAllWebhooks(dto);
+  async findAll(@Body() dto: WebhooksDto, @Req() req: Request) {
+    return this.webhookService.getAllWebhooks(
+      dto,
+      req.session?.organization?.id,
+    );
   }
 
   @Get("count")
