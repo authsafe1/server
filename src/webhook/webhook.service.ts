@@ -32,10 +32,10 @@ export class WebhookService {
     });
   }
 
-  async getWebhookById(id: string) {
+  async getWebhookById(id: string, organizationId: string) {
     try {
       return await this.prismaService.webhook.findUniqueOrThrow({
-        where: { id },
+        where: { id, organizationId },
       });
     } catch (error) {
       if (error.code === "P2025") {
