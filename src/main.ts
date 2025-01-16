@@ -40,7 +40,7 @@ async function bootstrap() {
     origin: (origin, callback) => {
       callback(null, origin);
     },
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
     allowedHeaders: "Content-Type, Authorization",
     credentials: true,
   });
