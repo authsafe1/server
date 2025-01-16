@@ -20,22 +20,30 @@ export class WebhookService {
     }
   }
 
-  async getAllWebhooks(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.WebhookWhereUniqueInput;
-    where?: Prisma.WebhookWhereInput;
-    orderBy?: Prisma.WebhookOrderByWithRelationInput;
-  }) {
+  async getAllWebhooks(
+    params: {
+      skip?: number;
+      take?: number;
+      cursor?: Prisma.WebhookWhereUniqueInput;
+      where?: Prisma.WebhookWhereInput;
+      orderBy?: Prisma.WebhookOrderByWithRelationInput;
+    },
+    organizationId: string,
+  ) {
+    const { where, ...paramsWithoutWhere } = params;
     return this.prismaService.webhook.findMany({
-      ...params,
+      where: {
+        ...where,
+        organizationId,
+      },
+      ...paramsWithoutWhere,
     });
   }
 
-  async getWebhookById(id: string) {
+  async getWebhookById(id: string, organizationId: string) {
     try {
       return await this.prismaService.webhook.findUniqueOrThrow({
-        where: { id },
+        where: { id, organizationId },
       });
     } catch (error) {
       if (error.code === "P2025") {

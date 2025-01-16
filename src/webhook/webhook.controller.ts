@@ -34,20 +34,23 @@ export class WebhookController {
   }
 
   @Post("all")
-  async findAll(@Body() dto: WebhooksDto) {
-    return this.webhookService.getAllWebhooks(dto);
+  async findAll(@Body() dto: WebhooksDto, @Req() req: Request) {
+    return this.webhookService.getAllWebhooks(
+      dto,
+      req.session?.organization?.id,
+    );
   }
 
   @Get("count")
   async countWebhooks(@Req() req: Request) {
     return this.webhookService.countWebhooks({
-      organizationId: req.session.organization.id,
+      organizationId: req.session?.organization?.id,
     });
   }
 
   @Get(":id")
-  async findOne(@Param("id") id: string) {
-    return this.webhookService.getWebhookById(id);
+  async findOne(@Param("id") id: string, @Req() req: Request) {
+    return this.webhookService.getWebhookById(id, req.session?.organization.id);
   }
 
   @Put("update/:id")
