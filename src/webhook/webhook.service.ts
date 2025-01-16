@@ -20,15 +20,23 @@ export class WebhookService {
     }
   }
 
-  async getAllWebhooks(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.WebhookWhereUniqueInput;
-    where?: Prisma.WebhookWhereInput;
-    orderBy?: Prisma.WebhookOrderByWithRelationInput;
-  }) {
+  async getAllWebhooks(
+    params: {
+      skip?: number;
+      take?: number;
+      cursor?: Prisma.WebhookWhereUniqueInput;
+      where?: Prisma.WebhookWhereInput;
+      orderBy?: Prisma.WebhookOrderByWithRelationInput;
+    },
+    organizationId: string,
+  ) {
+    const { where, ...paramsWithoutWhere } = params;
     return this.prismaService.webhook.findMany({
-      ...params,
+      where: {
+        ...where,
+        organizationId,
+      },
+      ...paramsWithoutWhere,
     });
   }
 
