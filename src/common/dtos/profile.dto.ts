@@ -21,6 +21,16 @@ export class CreateProfileDto {
   password: string;
 }
 
+export class ChangePasswordDto {
+  @IsString()
+  @MinLength(6)
+  oldPassword: string;
+
+  @IsString()
+  @MinLength(6)
+  newPassword: string;
+}
+
 export class UpdateProfileDto {
   @IsOptional()
   @IsString()
