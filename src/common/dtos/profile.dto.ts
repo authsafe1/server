@@ -5,7 +5,7 @@ import {
   IsObject,
   IsOptional,
   IsString,
-  MinLength,
+  Matches,
 } from "class-validator";
 
 export class CreateProfileDto {
@@ -17,17 +17,26 @@ export class CreateProfileDto {
   email: string;
 
   @IsString()
-  @MinLength(6)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
+    message:
+      "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
+  })
   password: string;
 }
 
 export class ChangePasswordDto {
   @IsString()
-  @MinLength(6)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
+    message:
+      "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
+  })
   oldPassword: string;
 
   @IsString()
-  @MinLength(6)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
+    message:
+      "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
+  })
   newPassword: string;
 }
 
@@ -43,7 +52,10 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(6)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
+    message:
+      "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
+  })
   password?: string;
 
   @IsOptional()

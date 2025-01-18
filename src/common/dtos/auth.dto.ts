@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, Matches } from "class-validator";
 
 export class LoginDto {
   @IsEmail()
@@ -7,7 +7,10 @@ export class LoginDto {
   email: string;
 
   @IsString()
-  @MinLength(6)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
+    message:
+      "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
+  })
   password: string;
 }
 
@@ -22,6 +25,9 @@ export class ResetPasswordDto {
   token: string;
 
   @IsString()
-  @MinLength(6)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
+    message:
+      "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
+  })
   password: string;
 }
