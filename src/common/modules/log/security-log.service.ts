@@ -56,8 +56,12 @@ export class SecurityAlertService {
   }
 
   async getAlertCount(where: Prisma.SecurityAlertWhereInput) {
-    return await this.prismaService.securityAlert.count({
-      where,
-    });
+    try {
+      return await this.prismaService.securityAlert.count({
+        where,
+      });
+    } catch {
+      throw new InternalServerErrorException();
+    }
   }
 }

@@ -262,6 +262,32 @@ export class ProfileService {
     }
   }
 
+  async changePassword(
+    email: string,
+    oldPassword: string,
+    newPassword: string,
+  ) {
+    try {
+      const profile = await this.prismaService.profile.findUniqueOrThrow({
+        where: {
+          email,
+        },
+      });
+      if (argon2.verify(profile.password, oldPassword)) {
+        const newDigest = await argon2.hash(newPassword);
+        return await this.prismaService.profile.update({
+          where: {
+            email,
+          },
+          data: {
+            password: newDigest,
+          },
+        });
+      }
+      return await this.prismaService.profile.update;
+    } catch {}
+  }
+
   async updateProfilePhoto(params: {
     where: Prisma.ProfileWhereUniqueInput;
     file: Express.Multer.File;

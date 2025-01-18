@@ -25,7 +25,11 @@ import {
 import { AuthorizationLogService } from "src/common/modules/log/authorization-log.service";
 import { SecurityAlertService } from "src/common/modules/log/security-log.service";
 import { CacheInvalidate } from "../common/decorators/cache.decorator";
-import { CreateProfileDto, UpdateProfileDto } from "../common/dtos/profile.dto";
+import {
+  ChangePasswordDto,
+  CreateProfileDto,
+  UpdateProfileDto,
+} from "../common/dtos/profile.dto";
 import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
 import { ActivityLogService } from "../common/modules/log/activity-log.service";
 import { ProfileService } from "./profile.service";
@@ -73,6 +77,17 @@ export class ProfileController {
       where: { id: req.session.profile.id },
       data: dto,
     });
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Put("change-password")
+  @CacheInvalidate("isAuthenticated")
+  async resetPassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {
+    return await this.profileService.changePassword(
+      req.session.profile?.email,
+      dto.oldPassword,
+      dto.newPassword,
+    );
   }
 
   @UseGuards(EnsureLoginGuard)

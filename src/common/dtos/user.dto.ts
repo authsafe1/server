@@ -8,8 +8,8 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   Min,
-  MinLength,
 } from "class-validator";
 
 export class CreateUserDto {
@@ -22,7 +22,10 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
-  @MinLength(6)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
+    message:
+      "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
+  })
   password: string;
 }
 
@@ -38,7 +41,10 @@ export class VerifyUserDto {
   name: string;
 
   @IsString()
-  @MinLength(6)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
+    message:
+      "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
+  })
   password: string;
 }
 
@@ -54,7 +60,10 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(6)
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
+    message:
+      "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
+  })
   password?: string;
 }
 
