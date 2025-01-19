@@ -236,6 +236,34 @@ export class UserService {
     }
   }
 
+  async createUsers(
+    organizationId: string,
+    unhashedData: Omit<
+      Prisma.UserCreateManyInput,
+      "Organization" | "verificationToken" | "organizationId"
+    >[],
+  ) {
+    try {
+      const hashedUsers = await Promise.all(
+        unhashedData.map(async user => ({
+          ...user,
+          password: await argon2.hash(user.password),
+          isVerified: true,
+          organizationId,
+        })),
+      );
+      const users = await this.prismaService.user.createManyAndReturn({
+        data: hashedUsers,
+        skipDuplicates: true,
+        omit: { password: true },
+      });
+      await this.eventEmitter.emitAsync("user.bulkCreated", { users });
+      return { message: `${users.length} users created` };
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
   async inviteUser(
     organizationId: string,
     data: Pick<Prisma.UserCreateInput, "email">,
