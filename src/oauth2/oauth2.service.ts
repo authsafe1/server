@@ -3,7 +3,6 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { JwtService, TokenExpiredError } from "@nestjs/jwt";
 import { Client, Permission, Role, User } from "@prisma/client";
 import argon2 from "argon2";
@@ -18,7 +17,6 @@ export class OAuth2Service {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
     private readonly authorizationLogService: AuthorizationLogService,
-    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -315,13 +313,13 @@ export class OAuth2Service {
 
   /**
    * Generate an Access Token.
-   * @param user: User,
-   * @param privateKey: string,
-   * @param keyId: string,
-   * @param client: Client,
-   * @param scope: string[],
-   * @param nonce: string,.
-   * @returns JWT Access Token.
+   * @param user User
+   * @param privateKey string
+   * @param keyId string
+   * @param client Client
+   * @param scope string[]
+   * @param nonce string
+   * @returns JWT Access Token
    */
   private async generateAcessToken(
     user: User & { Role: Role & { Permissions: Permission[] } },
