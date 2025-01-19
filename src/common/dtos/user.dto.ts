@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { Transform, Type } from "class-transformer";
 import {
+  IsArray,
   IsEmail,
   IsInt,
   IsNotEmpty,
@@ -10,6 +11,7 @@ import {
   IsUUID,
   Matches,
   Min,
+  ValidateNested,
 } from "class-validator";
 
 export class CreateUserDto {
@@ -27,6 +29,13 @@ export class CreateUserDto {
       "Must have one lowercase, one uppercase, one digit, one special character and minimum length must be 8",
   })
   password: string;
+}
+
+export class CreateBulkUsersDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateUserDto)
+  data: CreateUserDto[];
 }
 
 export class InviteUserDto {

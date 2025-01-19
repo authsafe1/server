@@ -13,6 +13,7 @@ import {
 import { Request } from "express";
 import {
   AssignRoleDto,
+  CreateBulkUsersDto,
   CreateUserDto,
   InviteUserDto,
   UpdateUserDto,
@@ -65,18 +66,27 @@ export class UserController {
   @UseGuards(EnsureLoginGuard)
   @Post("create")
   async createUser(@Body() dto: CreateUserDto, @Req() req: Request) {
-    return await this.userService.createUser(req.session.organization.id, dto);
+    return this.userService.createUser(req.session.organization.id, dto);
+  }
+
+  @UseGuards(EnsureLoginGuard)
+  @Post("create/bulk")
+  async createUsers(@Body() dto: CreateBulkUsersDto, @Req() req: Request) {
+    return this.userService.createUsers(
+      req.session?.organization?.id,
+      dto.data,
+    );
   }
 
   @UseGuards(EnsureLoginGuard)
   @Post("invite")
   async inviteUser(@Body() dto: InviteUserDto, @Req() req: Request) {
-    return await this.userService.inviteUser(req.session.organization.id, dto);
+    return this.userService.inviteUser(req.session.organization.id, dto);
   }
 
   @Post("confirm")
   async confirmUser(@Query("token") token: string, @Body() dto: VerifyUserDto) {
-    return await this.userService.verifyUser(token, dto);
+    return this.userService.verifyUser(token, dto);
   }
 
   @UseGuards(EnsureLoginGuard)
@@ -86,7 +96,7 @@ export class UserController {
     @Body() dto: UpdateUserDto,
     @Param("id") id: string,
   ) {
-    return await this.userService.updateUser({
+    return this.userService.updateUser({
       data: dto,
       where: {
         id,
@@ -102,17 +112,13 @@ export class UserController {
     @Param("id") id: string,
     @Body() dto: AssignRoleDto,
   ) {
-    return await this.userService.assignRole(
-      id,
-      req.session.organization.id,
-      dto,
-    );
+    return this.userService.assignRole(id, req.session.organization.id, dto);
   }
 
   @UseGuards(EnsureLoginGuard)
   @Delete("delete/:id")
   async deleteUser(@Req() req: Request, @Param("id") id: string) {
-    return await this.userService.deleteUser({
+    return this.userService.deleteUser({
       id,
       organizationId: req.session.organization.id,
     });
