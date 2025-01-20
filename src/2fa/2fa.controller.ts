@@ -6,6 +6,7 @@ import {
   Post,
   Req,
   Res,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Cache } from "cache-manager";
@@ -25,15 +26,15 @@ export class TwoFAController {
   @UseGuards(EnsureLoginGuard)
   @Post("enable")
   @CacheInvalidate("isAuthenticated")
-  async enableTwoFA(@Req() req: Request) {
-    return await this.twoFAService.enableTwoFactorAuth(req.session.profile.id);
+  async enableTwoFA(@Session() session: Request["session"]) {
+    return await this.twoFAService.enableTwoFactorAuth(session?.profile?.id);
   }
 
   @UseGuards(EnsureLoginGuard)
   @Post("disable")
   @CacheInvalidate("isAuthenticated")
-  async disableTwoFA(@Req() req: Request) {
-    await this.twoFAService.disableTwoFactorAuth(req.session.profile.id);
+  async disableTwoFA(@Session() session: Request["session"]) {
+    await this.twoFAService.disableTwoFactorAuth(session?.profile?.id);
     return { message: "2FA disabled" };
   }
 

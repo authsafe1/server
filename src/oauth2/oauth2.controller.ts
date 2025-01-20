@@ -5,7 +5,7 @@ import {
   Headers,
   Post,
   Query,
-  Req,
+  Session,
   UnauthorizedException,
   UseGuards,
 } from "@nestjs/common";
@@ -88,7 +88,7 @@ export class OAuth2Controller {
 
   @UseGuards(EnsureLoginGuard)
   @Get(".well-known/jwks")
-  async jwks(@Req() req: Request) {
-    return this.oauth2Service.getJWKS(req.session?.organization?.id);
+  async jwks(@Session() session: Request["session"]) {
+    return this.oauth2Service.getJWKS(session?.organization?.id);
   }
 }

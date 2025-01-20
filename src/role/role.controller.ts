@@ -7,7 +7,7 @@ import {
   Param,
   Post,
   Put,
-  Req,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
@@ -25,7 +25,10 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Post("create")
-  async create(@Body() dto: CreateRoleDto, @Req() req: Request) {
+  async create(
+    @Body() dto: CreateRoleDto,
+    @Session() session: Request["session"],
+  ) {
     const { permissions, ...dtoWithoutPermissions } = dto;
     return this.roleService.createRole({
       ...dtoWithoutPermissions,
@@ -34,7 +37,7 @@ export class RoleController {
           return { id: value.id };
         }),
       },
-      Organization: { connect: { id: req.session.organization.id } },
+      Organization: { connect: { id: session?.organization?.id } },
     });
   }
 
@@ -44,9 +47,9 @@ export class RoleController {
   }
 
   @Get("count")
-  async countUsers(@Req() req: Request) {
+  async countUsers(@Session() session: Request["session"]) {
     return this.roleService.countRoles({
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
     });
   }
 

@@ -6,7 +6,7 @@ import {
   Param,
   Post,
   Put,
-  Req,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
@@ -28,31 +28,37 @@ export class ClientController {
   async tokens(
     @Body()
     dto: ClientsDto,
-    @Req() req: Request,
+    @Session() session: Request["session"],
   ) {
-    return this.clientService.clients(dto, req.session.organization.id);
+    return this.clientService.clients(dto, session?.organization?.id);
   }
 
   @Get("count")
-  async countClients(@Req() req: Request) {
+  async countClients(@Session() session: Request["session"]) {
     return await this.clientService.countClients({
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
     });
   }
 
   @Get(":id")
-  async getClientById(@Param() params: ParamDto, @Req() req: Request) {
+  async getClientById(
+    @Param() params: ParamDto,
+    @Session() session: Request["session"],
+  ) {
     return await this.clientService.client({
       id: params.id,
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
     });
   }
 
   @Post("create")
-  async createClient(@Req() req: Request, @Body() dto: CreateClientDto) {
+  async createClient(
+    @Body() dto: CreateClientDto,
+    @Session() session: Request["session"],
+  ) {
     return await this.clientService.createClient(
-      req.session.organization.id,
       dto,
+      session?.organization?.id,
     );
   }
 
@@ -60,22 +66,25 @@ export class ClientController {
   async updateClient(
     @Param() params: ParamDto,
     @Body() dto: UpdateClientDto,
-    @Req() req: Request,
+    @Session() session: Request["session"],
   ) {
     return await this.clientService.updateClient({
       data: dto,
       where: {
         id: params.id,
-        organizationId: req.session.organization.id,
+        organizationId: session?.organization?.id,
       },
     });
   }
 
   @Delete("delete/:id")
-  async deleteClient(@Param() params: ParamDto, @Req() req: Request) {
+  async deleteClient(
+    @Param() params: ParamDto,
+    @Session() session: Request["session"],
+  ) {
     return await this.clientService.deleteClient({
       id: params.id,
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
     });
   }
 }

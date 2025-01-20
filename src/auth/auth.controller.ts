@@ -8,6 +8,7 @@ import {
   Post,
   Req,
   Res,
+  Session,
   UnauthorizedException,
   UseGuards,
 } from "@nestjs/common";
@@ -123,7 +124,7 @@ export class AuthController {
   @Cache(60)
   @UseGuards(EnsureLoginGuard)
   @Get("check")
-  async isAuthenticated(@Req() req: Request) {
-    return this.authService.isAuthenticated(req?.session);
+  async isAuthenticated(@Session() session: Request["session"]) {
+    return this.authService.isAuthenticated(session?.profile?.id);
   }
 }
