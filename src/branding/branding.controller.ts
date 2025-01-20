@@ -4,7 +4,7 @@ import {
   Get,
   Put,
   Query,
-  Req,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
@@ -18,9 +18,12 @@ export class BrandingController {
   constructor(private readonly brandingService: BrandingService) {}
 
   @Put("update")
-  async updateBranding(@Req() req: Request, @Body() dto: UpdateBrandingDto) {
+  async updateBranding(
+    @Body() dto: UpdateBrandingDto,
+    @Session() session: Request["session"],
+  ) {
     return await this.brandingService.updateBranding(
-      { organizationId: req.session?.organization?.id },
+      { organizationId: session?.organization?.id },
       dto,
     );
   }
@@ -28,10 +31,10 @@ export class BrandingController {
   @Get()
   async getBranding(
     @Query("organizationId") organizationId: string,
-    @Req() req: Request,
+    @Session() session: Request["session"],
   ) {
     return await this.brandingService.getBranding({
-      organizationId: req.session?.organization?.id || organizationId,
+      organizationId: session?.organization?.id || organizationId,
     });
   }
 }

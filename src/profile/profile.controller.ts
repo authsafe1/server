@@ -10,6 +10,7 @@ import {
   Query,
   Req,
   Res,
+  Session,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -72,9 +73,12 @@ export class ProfileController {
   @UseGuards(EnsureLoginGuard)
   @Put("update")
   @CacheInvalidate("isAuthenticated")
-  async updateOrganization(@Req() req: Request, @Body() dto: UpdateProfileDto) {
+  async updateOrganization(
+    @Body() dto: UpdateProfileDto,
+    @Session() session: Request["session"],
+  ) {
     return await this.profileService.updateProfile({
-      where: { id: req.session.profile.id },
+      where: { id: session?.profile?.id },
       data: dto,
     });
   }
@@ -82,9 +86,12 @@ export class ProfileController {
   @UseGuards(EnsureLoginGuard)
   @Put("change-password")
   @CacheInvalidate("isAuthenticated")
-  async resetPassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {
+  async resetPassword(
+    @Body() dto: ChangePasswordDto,
+    @Session() session: Request["session"],
+  ) {
     return await this.profileService.changePassword(
-      req.session.profile?.email,
+      session?.profile?.email,
       dto.oldPassword,
       dto.newPassword,
     );
@@ -96,10 +103,10 @@ export class ProfileController {
   @CacheInvalidate("isAuthenticated")
   async uploadPhoto(
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: Request,
+    @Session() session: Request["session"],
   ) {
     return await this.profileService.updateProfilePhoto({
-      where: { id: req.session.profile.id },
+      where: { id: session?.profile?.id },
       file,
     });
   }
@@ -126,20 +133,23 @@ export class ProfileController {
 
   @UseGuards(EnsureLoginGuard)
   @Get("log/activity/data")
-  async getActivityData(@Req() req: Request) {
+  async getActivityData(@Session() session: Request["session"]) {
     return await this.activityLogService.getUserActivityOverTime(
-      req.session?.profile?.id,
+      session?.profile?.id,
     );
   }
 
   @UseGuards(EnsureLoginGuard)
   @Post("log/security/all")
-  async getAllSecurityLogs(@Req() req: Request, @Body() dto: SecurityAlertDto) {
+  async getAllSecurityLogs(
+    @Body() dto: SecurityAlertDto,
+    @Session() session: Request["session"],
+  ) {
     const { where, ...params } = dto;
     return await this.securityAlertService.getAllSecurityAlerts({
       where: {
         ...where,
-        profileId: req.session?.profile?.id,
+        profileId: session?.profile?.id,
       },
       ...params,
     });
@@ -147,23 +157,23 @@ export class ProfileController {
 
   @UseGuards(EnsureLoginGuard)
   @Get("log/security/count")
-  async countSecurityLogs(@Req() req: Request) {
+  async countSecurityLogs(@Session() session: Request["session"]) {
     return await this.securityAlertService.countSecurityAlerts({
-      profileId: req.session?.profile?.id,
+      profileId: session?.profile?.id,
     });
   }
 
   @UseGuards(EnsureLoginGuard)
   @Post("log/authorization/all")
   async getAllAuthorizationLogs(
-    @Req() req: Request,
     @Body() dto: AuthorizationLogDto,
+    @Session() session: Request["session"],
   ) {
     const { where, ...params } = dto;
     return await this.authorizationLogService.getAllAuthorizationLogs({
       where: {
         ...where,
-        profileId: req.session?.profile?.id,
+        profileId: session?.profile?.id,
       },
       ...params,
     });
@@ -171,20 +181,23 @@ export class ProfileController {
 
   @UseGuards(EnsureLoginGuard)
   @Get("log/authorization/count")
-  async countAuthorizationLogs(@Req() req: Request) {
+  async countAuthorizationLogs(@Session() session: Request["session"]) {
     return await this.authorizationLogService.countAuthorizationLogs({
-      profileId: req.session?.profile?.id,
+      profileId: session?.profile?.id,
     });
   }
 
   @UseGuards(EnsureLoginGuard)
   @Post("log/activity/all")
-  async getAllActivityLogs(@Req() req: Request, @Body() dto: ActivityLogDto) {
+  async getAllActivityLogs(
+    @Body() dto: ActivityLogDto,
+    @Session() session: Request["session"],
+  ) {
     const { where, ...params } = dto;
     return await this.activityLogService.getAllActivityLogs({
       where: {
         ...where,
-        profileId: req.session?.profile?.id,
+        profileId: session?.profile?.id,
       },
       ...params,
     });
@@ -192,9 +205,9 @@ export class ProfileController {
 
   @UseGuards(EnsureLoginGuard)
   @Get("log/activity/count")
-  async countActivityLogs(@Req() req: Request) {
+  async countActivityLogs(@Session() session: Request["session"]) {
     return await this.activityLogService.countActivityLogs({
-      profileId: req.session?.profile?.id,
+      profileId: session?.profile?.id,
     });
   }
 }

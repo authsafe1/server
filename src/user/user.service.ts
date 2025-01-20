@@ -208,11 +208,11 @@ export class UserService {
   }
 
   async createUser(
-    organizationId: string,
     unhashedData: Omit<
       Prisma.UserCreateInput,
       "Organization" | "verificationToken"
     >,
+    organizationId: string,
   ) {
     try {
       const { email, password, name } = unhashedData;
@@ -237,11 +237,11 @@ export class UserService {
   }
 
   async createUsers(
-    organizationId: string,
     unhashedData: Omit<
       Prisma.UserCreateManyInput,
       "Organization" | "verificationToken" | "organizationId"
     >[],
+    organizationId: string,
   ) {
     try {
       const hashedUsers = await Promise.all(
@@ -265,8 +265,8 @@ export class UserService {
   }
 
   async inviteUser(
-    organizationId: string,
     data: Pick<Prisma.UserCreateInput, "email">,
+    organizationId: string,
   ) {
     try {
       const token = (await promisify(randomBytes)(64)).toString("hex");

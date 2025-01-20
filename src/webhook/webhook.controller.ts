@@ -6,7 +6,7 @@ import {
   Param,
   Post,
   Put,
-  Req,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
@@ -24,33 +24,34 @@ export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
   @Post("create")
-  async createWebhook(@Body() dto: CreateWebhookDto, @Req() req: Request) {
-    await this.webhookService.createWebhook({
-      ...dto,
-      Organization: {
-        connect: { id: req.session?.organization?.id },
-      },
-    });
+  async createWebhook(
+    @Body() dto: CreateWebhookDto,
+    @Session() session: Request["session"],
+  ) {
+    await this.webhookService.createWebhook(dto, session?.organization?.id);
   }
 
   @Post("all")
-  async findAll(@Body() dto: WebhooksDto, @Req() req: Request) {
-    return this.webhookService.getAllWebhooks(
-      dto,
-      req.session?.organization?.id,
-    );
+  async findAll(
+    @Body() dto: WebhooksDto,
+    @Session() session: Request["session"],
+  ) {
+    return this.webhookService.getAllWebhooks(dto, session?.organization?.id);
   }
 
   @Get("count")
-  async countWebhooks(@Req() req: Request) {
+  async countWebhooks(@Session() session: Request["session"]) {
     return this.webhookService.countWebhooks({
-      organizationId: req.session?.organization?.id,
+      organizationId: session?.organization?.id,
     });
   }
 
   @Get(":id")
-  async findOne(@Param("id") id: string, @Req() req: Request) {
-    return this.webhookService.getWebhookById(id, req.session?.organization.id);
+  async findOne(
+    @Param("id") id: string,
+    @Session() session: Request["session"],
+  ) {
+    return this.webhookService.getWebhookById(id, session?.organization.id);
   }
 
   @Put("update/:id")

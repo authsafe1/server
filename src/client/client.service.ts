@@ -55,8 +55,8 @@ export class ClientService {
   }
 
   async createClient(
-    organizationId: string,
     clientData: Omit<Prisma.ClientCreateInput, "Organization">,
+    organizationId: string,
   ): Promise<Client> {
     try {
       if (!organizationId) {

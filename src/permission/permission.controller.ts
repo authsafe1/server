@@ -7,7 +7,7 @@ import {
   Param,
   Post,
   Put,
-  Req,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
@@ -25,10 +25,13 @@ export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 
   @Post("create")
-  async create(@Body() dto: CreatePermissionDto, @Req() req: Request) {
+  async create(
+    @Body() dto: CreatePermissionDto,
+    @Session() session: Request["session"],
+  ) {
     return this.permissionService.createPermission({
       ...dto,
-      Organization: { connect: { id: req.session.organization.id } },
+      Organization: { connect: { id: session?.organization?.id } },
     });
   }
 
@@ -38,9 +41,9 @@ export class PermissionController {
   }
 
   @Get("count")
-  async countPermissions(@Req() req: Request) {
+  async countPermissions(@Session() session: Request["session"]) {
     return this.permissionService.countPermissions({
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
     });
   }
 

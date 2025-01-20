@@ -9,7 +9,6 @@ import argon2 from "argon2";
 import { Queue } from "bullmq";
 import { randomBytes } from "crypto";
 import dayjs from "dayjs";
-import { Request } from "express";
 import { promisify } from "util";
 import { MailAction } from "../common/enums/MailActionJob";
 import { QueueName } from "../common/enums/QueueName";
@@ -186,46 +185,42 @@ export class AuthService {
     }
   }
 
-  async isAuthenticated(session: Request["session"]) {
+  async isAuthenticated(profileId: string) {
     try {
-      if (session && session.profile) {
-        return await this.prismaService.profile.findUniqueOrThrow({
-          where: {
-            id: session.profile.id,
-          },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            photo: true,
-            plan: true,
-            isVerified: true,
-            isTwoFactorAuthEnabled: true,
-            Organizations: {
-              select: {
-                id: true,
-                name: true,
-                domain: true,
-                metadata: true,
-                Secret: {
-                  select: {
-                    publicKey: true,
-                    ApiKeys: {
-                      select: {
-                        token: true,
-                      },
+      return await this.prismaService.profile.findUniqueOrThrow({
+        where: {
+          id: profileId,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          photo: true,
+          plan: true,
+          isVerified: true,
+          isTwoFactorAuthEnabled: true,
+          Organizations: {
+            select: {
+              id: true,
+              name: true,
+              domain: true,
+              metadata: true,
+              Secret: {
+                select: {
+                  publicKey: true,
+                  ApiKeys: {
+                    select: {
+                      token: true,
                     },
                   },
                 },
               },
             },
           },
-        });
-      } else {
-        throw new Error("UNAUTHORIZED");
-      }
+        },
+      });
     } catch (err) {
-      if (err.code === "P2025" || err.message === "UNAUTHORIZED") {
+      if (err.code === "P2025") {
         throw new UnauthorizedException("Not Logged In");
       } else {
         throw new InternalServerErrorException();

@@ -6,7 +6,7 @@ import {
   Param,
   Post,
   Put,
-  Req,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
@@ -27,47 +27,56 @@ export class TemplateController {
   async templates(
     @Body()
     dto: TemplatesDto,
-    @Req() req: Request,
+    @Session() session: Request["session"],
   ) {
-    return this.templateService.templates(dto, req.session.organization.id);
+    return this.templateService.templates(dto, session?.organization?.id);
   }
 
   @Get(":id")
-  async getTemplate(@Param("id") id: string, @Req() req: Request) {
+  async getTemplate(
+    @Param("id") id: string,
+    @Session() session: Request["session"],
+  ) {
     return this.templateService.template({
       id,
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
     });
   }
 
   @Post("create")
-  async createTemplate(@Body() dto: CreateTemplateDto, @Req() req: Request) {
+  async createTemplate(
+    @Body() dto: CreateTemplateDto,
+    @Session() session: Request["session"],
+  ) {
     return await this.templateService.createTemplate(
-      req.session.organization.id,
       dto,
+      session?.organization?.id,
     );
   }
 
   @Put("update/:id")
   async updateTemplate(
-    @Req() req: Request,
     @Body() dto: UpdateTemplateDto,
     @Param("id") id: string,
+    @Session() session: Request["session"],
   ) {
     return await this.templateService.updateTemplate(
       {
         id,
-        organizationId: req.session.organization.id,
+        organizationId: session?.organization?.id,
       },
       dto,
     );
   }
 
   @Delete("delete/:id")
-  async deleteTemplate(@Req() req: Request, @Param("id") id: string) {
+  async deleteTemplate(
+    @Param("id") id: string,
+    @Session() session: Request["session"],
+  ) {
     return await this.templateService.deleteTemplate({
       id,
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
     });
   }
 }

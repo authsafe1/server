@@ -54,8 +54,8 @@ export class TemplateService {
   }
 
   async createTemplate(
-    organizationId: string,
     data: Omit<Prisma.EmailTemplateCreateInput, "Organization">,
+    organizationId: string,
   ) {
     try {
       const template = await this.prismaService.emailTemplate.create({

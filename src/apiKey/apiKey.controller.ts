@@ -7,7 +7,7 @@ import {
   Param,
   Post,
   Put,
-  Req,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
@@ -25,26 +25,32 @@ export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
   @Post("create")
-  async create(@Body() dto: CreateApiKeyDto, @Req() req: Request) {
+  async create(
+    @Body() dto: CreateApiKeyDto,
+    @Session() session: Request["session"],
+  ) {
     return this.apiKeyService.createApiKey(
       { ...dto },
-      req.session.organization?.Secret?.id,
+      session.organization?.Secret?.id,
     );
   }
 
   @Post("all")
-  async findAll(@Body() dto: ApiKeysDto, @Req() req: Request) {
+  async findAll(
+    @Body() dto: ApiKeysDto,
+    @Session() session: Request["session"],
+  ) {
     const apikey = await this.apiKeyService.getAllApiKeys(
       dto,
-      req.session.organization?.Secret?.id,
+      session?.organization?.Secret?.id,
     );
     return apikey;
   }
 
   @Get("count")
-  async getCount(@Req() req: Request) {
+  async getCount(@Session() session: Request["session"]) {
     return this.apiKeyService.countApiKeys({
-      secretId: req.session.organization?.Secret?.id,
+      secretId: session?.organization?.Secret?.id,
     });
   }
 
@@ -52,28 +58,34 @@ export class ApiKeyController {
   async updateApiKey(
     @Param("token") token: string,
     @Body() dto: UpdateApiKeyDto,
-    @Req() req: Request,
+    @Session() session: Request["session"],
   ) {
     return this.apiKeyService.updateApiKey(
       dto,
       token,
-      req.session.organization?.Secret?.id,
+      session?.organization?.Secret?.id,
     );
   }
 
   @Get(":token")
-  async findOne(@Param("token") token: string, @Req() req: Request) {
+  async findOne(
+    @Param("token") token: string,
+    @Session() session: Request["session"],
+  ) {
     return this.apiKeyService.getApiKeyByToken(
       token,
-      req.session.organization?.Secret?.id,
+      session?.organization?.Secret?.id,
     );
   }
 
   @Delete("delete/:token")
-  async remove(@Param("token") token: string, @Req() req: Request) {
+  async remove(
+    @Param("token") token: string,
+    @Session() session: Request["session"],
+  ) {
     return this.apiKeyService.deleteApiKey(
       token,
-      req.session.organization?.Secret?.id,
+      session?.organization?.Secret?.id,
     );
   }
 }

@@ -7,7 +7,7 @@ import {
   Post,
   Put,
   Query,
-  Req,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
@@ -32,56 +32,65 @@ export class UserController {
   async users(
     @Body()
     dto: UsersDto,
-    @Req() req: Request,
+    @Session() session: Request["session"],
   ) {
-    return this.userService.users(dto, req.session.organization.id);
+    return this.userService.users(dto, session?.organization?.id);
   }
 
   @UseGuards(EnsureLoginGuard)
   @Get("count")
-  async countUsers(@Req() req: Request) {
+  async countUsers(@Session() session: Request["session"]) {
     return this.userService.countUsers({
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
     });
   }
 
   @UseGuards(EnsureLoginGuard)
   @Get("count/month")
-  async countUsersMonthwise(@Req() req: Request) {
+  async countUsersMonthwise(@Session() session: Request["session"]) {
     return await this.userService.getMonthlyUserCount(
-      req.session.organization.id,
+      session?.organization?.id,
     );
   }
 
   @UseGuards(EnsureLoginGuard)
   @Get(":id")
-  async getUser(@Param("id") id: string, @Req() req: Request) {
+  async getUser(
+    @Param("id") id: string,
+    @Session() session: Request["session"],
+  ) {
     return this.userService.user({
       id,
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
       isVerified: true,
     });
   }
 
   @UseGuards(EnsureLoginGuard)
   @Post("create")
-  async createUser(@Body() dto: CreateUserDto, @Req() req: Request) {
-    return this.userService.createUser(req.session.organization.id, dto);
+  async createUser(
+    @Body() dto: CreateUserDto,
+    @Session() session: Request["session"],
+  ) {
+    return this.userService.createUser(dto, session?.organization?.id);
   }
 
   @UseGuards(EnsureLoginGuard)
   @Post("create/bulk")
-  async createUsers(@Body() dto: CreateBulkUsersDto, @Req() req: Request) {
-    return this.userService.createUsers(
-      req.session?.organization?.id,
-      dto.data,
-    );
+  async createUsers(
+    @Body() dto: CreateBulkUsersDto,
+    @Session() session: Request["session"],
+  ) {
+    return this.userService.createUsers(dto.data, session?.organization?.id);
   }
 
   @UseGuards(EnsureLoginGuard)
   @Post("invite")
-  async inviteUser(@Body() dto: InviteUserDto, @Req() req: Request) {
-    return this.userService.inviteUser(req.session.organization.id, dto);
+  async inviteUser(
+    @Body() dto: InviteUserDto,
+    @Session() session: Request["session"],
+  ) {
+    return this.userService.inviteUser(dto, session?.organization?.id);
   }
 
   @Post("confirm")
@@ -92,15 +101,15 @@ export class UserController {
   @UseGuards(EnsureLoginGuard)
   @Put("update/:id")
   async updateUser(
-    @Req() req: Request,
     @Body() dto: UpdateUserDto,
     @Param("id") id: string,
+    @Session() session: Request["session"],
   ) {
     return this.userService.updateUser({
       data: dto,
       where: {
         id,
-        organizationId: req.session.organization.id,
+        organizationId: session?.organization?.id,
       },
     });
   }
@@ -108,19 +117,22 @@ export class UserController {
   @UseGuards(EnsureLoginGuard)
   @Post("assign/role/:id")
   async assignRole(
-    @Req() req: Request,
     @Param("id") id: string,
     @Body() dto: AssignRoleDto,
+    @Session() session: Request["session"],
   ) {
-    return this.userService.assignRole(id, req.session.organization.id, dto);
+    return this.userService.assignRole(id, session?.organization?.id, dto);
   }
 
   @UseGuards(EnsureLoginGuard)
   @Delete("delete/:id")
-  async deleteUser(@Req() req: Request, @Param("id") id: string) {
+  async deleteUser(
+    @Param("id") id: string,
+    @Session() session: Request["session"],
+  ) {
     return this.userService.deleteUser({
       id,
-      organizationId: req.session.organization.id,
+      organizationId: session?.organization?.id,
     });
   }
 }

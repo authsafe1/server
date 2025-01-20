@@ -10,6 +10,7 @@ import {
   Put,
   Req,
   Res,
+  Session,
   UseGuards,
 } from "@nestjs/common";
 import { Cache } from "cache-manager";
@@ -33,29 +34,35 @@ export class OrganizationController {
 
   @Post("create")
   @CacheInvalidate("isAuthenticated")
-  async createUser(@Body() dto: CreateOrganizationDto, @Req() req: Request) {
+  async createUser(
+    @Body() dto: CreateOrganizationDto,
+    @Session() session: Request["session"],
+  ) {
     return await this.organizationService.createOrganization({
       ...dto,
       Profile: {
         connect: {
-          id: req.session.profile.id,
+          id: session?.profile?.id,
         },
       },
     });
   }
 
   @Post("all")
-  async findAll(@Body() dto: OrganizationsDto, @Req() req: Request) {
+  async findAll(
+    @Body() dto: OrganizationsDto,
+    @Session() session: Request["session"],
+  ) {
     return this.organizationService.getAllOrganizations(
       dto,
-      req.session?.profile?.id,
+      session?.profile?.id,
     );
   }
 
   @Get("count")
-  async getCount(@Req() req: Request) {
+  async getCount(@Session() session: Request["session"]) {
     return this.organizationService.countOrganizations({
-      profileId: req.session?.profile?.id,
+      profileId: session?.profile?.id,
     });
   }
 
@@ -63,11 +70,11 @@ export class OrganizationController {
   @CacheInvalidate("isAuthenticated")
   async updateOrganization(
     @Param("id") id: string,
-    @Req() req: Request,
     @Body() dto: UpdateOrganizationDto,
+    @Session() session: Request["session"],
   ) {
     return await this.organizationService.updateOrganization({
-      where: { id, profileId: req.session?.profile?.id },
+      where: { id, profileId: session?.profile?.id },
       data: dto,
     });
   }

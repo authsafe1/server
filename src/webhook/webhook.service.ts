@@ -10,10 +10,20 @@ import { PrismaService } from "../common/modules/prisma/prisma.service";
 export class WebhookService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async createWebhook(data: Prisma.WebhookCreateInput) {
+  async createWebhook(
+    data: Omit<Prisma.WebhookCreateInput, "organizationId" | "Organization">,
+    organizationId: string,
+  ) {
     try {
       return await this.prismaService.webhook.create({
-        data,
+        data: {
+          ...data,
+          Organization: {
+            connect: {
+              id: organizationId,
+            },
+          },
+        },
       });
     } catch {
       throw new InternalServerErrorException();
