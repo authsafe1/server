@@ -50,6 +50,9 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+  app.useBodyParser("json", {
+    limit: "10mb",
+  });
   app.enableShutdownHooks();
   await app.listen(3000);
 }
