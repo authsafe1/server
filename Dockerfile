@@ -1,7 +1,5 @@
 FROM node:22 AS base
 
-RUN apk add --no-cache openssl
-
 FROM base AS builder
 
 WORKDIR /app
