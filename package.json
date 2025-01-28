@@ -7,8 +7,8 @@
     "name": "AuthSafe",
     "email": "support@authsafe.in"
   },
-  "license": "GPL-3.0-only",
   "description": "AuthSafe authorization server",
+  "license": "Proprietary License",
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
