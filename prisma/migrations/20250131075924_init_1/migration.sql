@@ -254,10 +254,8 @@ CREATE TABLE "Subscription" (
     "id" TEXT NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "endDate" TIMESTAMP(3),
-    "status" "SubscriptionStatus" NOT NULL DEFAULT 'ACTIVE',
-    "customerId" TEXT,
-    "subscriptionId" TEXT,
-    "amount" DECIMAL(65,30) NOT NULL,
+    "status" "SubscriptionStatus" NOT NULL DEFAULT 'INCOMPLETE',
+    "subscriptionId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "profileId" TEXT NOT NULL,
@@ -398,10 +396,13 @@ CREATE INDEX "Secret_privateKey_publicKey_organizationId_idx" ON "Secret"("priva
 CREATE INDEX "SecurityAlert_severity_createdAt_profileId_idx" ON "SecurityAlert"("severity", "createdAt", "profileId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Subscription_subscriptionId_key" ON "Subscription"("subscriptionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Subscription_profileId_key" ON "Subscription"("profileId");
 
 -- CreateIndex
-CREATE INDEX "Subscription_profileId_customerId_subscriptionId_idx" ON "Subscription"("profileId", "customerId", "subscriptionId");
+CREATE INDEX "Subscription_profileId_subscriptionId_idx" ON "Subscription"("profileId", "subscriptionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
@@ -479,7 +480,7 @@ ALTER TABLE "Secret" ADD CONSTRAINT "Secret_organizationId_fkey" FOREIGN KEY ("o
 ALTER TABLE "SecurityAlert" ADD CONSTRAINT "SecurityAlert_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
