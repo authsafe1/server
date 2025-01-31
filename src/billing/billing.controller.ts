@@ -8,6 +8,10 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
+import {
+  CreateBillingDto,
+  VerifyPaymentDto,
+} from "src/common/dtos/billing.dto";
 import { EnsureLoginGuard } from "../common/guards/ensure-login.guard";
 import { BillingService } from "./billing.service";
 
@@ -18,13 +22,25 @@ export class BillingController {
 
   @Post("create")
   async createSubscription(
-    @Body() body: { planId: string; amount: number },
+    @Body() dto: CreateBillingDto,
     @Session() session: Request["session"],
   ) {
     return this.billingService.createSubscription(
       session.profile.id,
-      body.planId,
-      body.amount,
+      dto.planId,
+    );
+  }
+
+  @Post("verify")
+  async verifyPayment(
+    @Body() dto: VerifyPaymentDto,
+    @Session() session: Request["session"],
+  ) {
+    return this.billingService.verifyPayment(
+      dto.paymentId,
+      dto.subscriptionId,
+      dto.razorpaySignature,
+      session.profile.id,
     );
   }
 
