@@ -1,5 +1,11 @@
-import { Injectable, Logger } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { SubscriptionStatus } from "@prisma/client";
+import { createHmac } from "crypto";
 import dayjs from "dayjs";
 import Razorpay from "razorpay";
 import { PrismaService } from "../common/modules/prisma/prisma.service";
@@ -16,32 +22,67 @@ export class BillingService {
     });
   }
 
-  async createSubscription(profileId: string, planId: string, amount: number) {
-    const subscription = await this.razorpay.subscriptions.create({
-      plan_id: planId,
-      customer_notify: 1,
-      total_count: 12,
-      start_at: dayjs().add(1, "day").unix(),
-      notes: { user: profileId },
-    });
+  async createSubscription(profileId: string, planId: string) {
+    try {
+      const subscription = await this.razorpay.subscriptions.create({
+        plan_id: planId,
+        customer_notify: 1,
+        total_count: 12,
+        start_at: dayjs().add(1, "day").unix(),
+        notes: { profileId },
+      });
 
-    const newSubscription = await this.prismaService.subscription.create({
-      data: {
-        profileId,
-        subscriptionId: subscription.id,
-        amount: amount,
-        status: SubscriptionStatus.CANCELLED,
-        startDate: dayjs().toDate(),
-        endDate: dayjs().add(12, "months").toDate(),
-      },
-    });
+      await this.prismaService.subscription.create({
+        data: {
+          subscriptionId: subscription.id,
+          status: SubscriptionStatus.INCOMPLETE,
+          startDate: dayjs().add(1, "day").toDate(),
+          endDate: dayjs().add(12, "months").toDate(),
+          Profile: {
+            connect: {
+              id: profileId,
+            },
+          },
+        },
+      });
 
-    return { subscription, newSubscription };
+      return { subscriptionId: subscription.id };
+    } catch {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async verifyPayment(
+    paymentId: string,
+    subscriptionId: string,
+    razorpaySignature: string,
+    profileId: string,
+  ) {
+    const generatedSignature = createHmac(
+      "sha256",
+      process.env.RAZORPAY_KEY_SECRET,
+    )
+      .update(`${paymentId}|${subscriptionId}`)
+      .digest("hex");
+    if (generatedSignature === razorpaySignature) {
+      await this.prismaService.subscription.update({
+        where: {
+          subscriptionId,
+          profileId,
+        },
+        data: {
+          status: SubscriptionStatus.ACTIVE,
+        },
+      });
+      return { message: "Payment verified" };
+    } else {
+      throw new UnauthorizedException("Payment failed");
+    }
   }
 
   async cancelSubscription(subscriptionId: string) {
     await this.razorpay.subscriptions.cancel(subscriptionId);
-    await this.prismaService.subscription.updateMany({
+    await this.prismaService.subscription.update({
       where: { subscriptionId },
       data: { status: SubscriptionStatus.CANCELLED },
     });
@@ -53,7 +94,7 @@ export class BillingService {
     subscriptionId: string,
     status: SubscriptionStatus,
   ) {
-    await this.prismaService.subscription.updateMany({
+    await this.prismaService.subscription.update({
       where: { subscriptionId },
       data: { status },
     });
