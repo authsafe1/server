@@ -196,7 +196,6 @@ export class AuthService {
           name: true,
           email: true,
           photo: true,
-          plan: true,
           isVerified: true,
           isTwoFactorAuthEnabled: true,
           Organizations: {
@@ -215,6 +214,11 @@ export class AuthService {
                   },
                 },
               },
+            },
+          },
+          Subscription: {
+            select: {
+              type: true,
             },
           },
         },
