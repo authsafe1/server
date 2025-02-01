@@ -6,11 +6,17 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { Prisma, Profile } from "@prisma/client";
+import {
+  Prisma,
+  Profile,
+  SubscriptionStatus,
+  SubscriptionType,
+} from "@prisma/client";
 import argon2 from "argon2";
 import { Queue } from "bullmq";
 import { UploadApiErrorResponse } from "cloudinary";
 import { randomBytes } from "crypto";
+import dayjs from "dayjs";
 import { promisify } from "util";
 import { MailAction } from "../common/enums/MailActionJob";
 import { QueueName } from "../common/enums/QueueName";
@@ -165,14 +171,28 @@ export class ProfileService {
       const digest = await argon2.hash(password);
       const token = (await promisify(randomBytes)(64)).toString("hex");
 
-      const profile = await this.prismaService.profile.create({
-        data: {
-          name,
-          email,
-          password: digest,
-          isVerified: false,
-          verificationToken: token,
-        },
+      const profile = await this.prismaService.$transaction(async prisma => {
+        const newProfile = await prisma.profile.create({
+          data: {
+            name,
+            email,
+            password: digest,
+            isVerified: false,
+            verificationToken: token,
+          },
+        });
+        await prisma.subscription.create({
+          data: {
+            profileId: newProfile.id,
+            type: SubscriptionType.FREE,
+            status: SubscriptionStatus.ACTIVE,
+            startDate: dayjs().toDate(),
+            endDate: dayjs().add(100, "years").toDate(),
+            subscriptionId: `free-${newProfile.id}`,
+          },
+        });
+
+        return newProfile;
       });
 
       const url = this.createURL(token);
@@ -195,16 +215,35 @@ export class ProfileService {
       const { name, email, password } = unhashedData;
       const digest = await argon2.hash(password);
 
-      return await this.prismaService.profile.create({
-        data: {
-          name,
-          email,
-          password: digest,
-          isVerified: true,
-          verificationToken: "",
-        },
+      return await this.prismaService.$transaction(async prisma => {
+        const newProfile = await prisma.profile.create({
+          data: {
+            name,
+            email,
+            password: digest,
+            isVerified: true,
+            verificationToken: "",
+          },
+        });
+        await prisma.subscription.create({
+          data: {
+            type: SubscriptionType.FREE,
+            status: SubscriptionStatus.ACTIVE,
+            startDate: dayjs().toDate(),
+            endDate: dayjs().add(100, "years").toDate(),
+            subscriptionId: `free-${newProfile.id}`,
+            Profile: {
+              connect: {
+                id: newProfile.id,
+              },
+            },
+          },
+        });
+
+        return newProfile;
       });
-    } catch {
+    } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }
