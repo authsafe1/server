@@ -9,7 +9,7 @@ import { Cache as CacheType } from "cache-manager";
 import { Request } from "express";
 
 @Injectable()
-export class OrganizationSpecificCacheInterceptor extends CacheInterceptor {
+export class ProfileSpecificCacheInterceptor extends CacheInterceptor {
   trackBy(context: ExecutionContext): string {
     const request = context.switchToHttp().getRequest<Request>();
     const profileId = request.session?.profile?.id;
@@ -27,11 +27,7 @@ export class OrganizationSpecificCacheInterceptor extends CacheInterceptor {
  */
 export function Cache(ttlSeconds: number): MethodDecorator {
   return function (target: any, key: string, descriptor: PropertyDescriptor) {
-    UseInterceptors(OrganizationSpecificCacheInterceptor)(
-      target,
-      key,
-      descriptor,
-    );
+    UseInterceptors(ProfileSpecificCacheInterceptor)(target, key, descriptor);
     CacheTTL(ttlSeconds * 1000)(target, key, descriptor);
   };
 }
@@ -47,23 +43,36 @@ export function CacheInvalidate(handlerName: string): MethodDecorator {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
-      const request: Request = args.find(
-        arg => arg && arg.session && arg.session?.profile?.id,
+      let request: Request | Partial<Request> | undefined;
+
+      // Find Request in arguments if it's provided via @Req()
+      const reqArg = args.find(
+        arg => arg instanceof Object && "session" in arg,
       );
-      if (!request) {
+
+      if (reqArg) {
+        request = reqArg as Request; // Found a full request object
+      } else {
+        // If @Session() is used, reconstruct the necessary part of the Request object
+        const session = args.find(arg => arg?.profile?.id);
+        if (session) {
+          request = { session } as Partial<Request>;
+        }
+      }
+
+      if (!request || !request.session?.profile?.id) {
         throw new InternalServerErrorException(
-          "Request or organization session data not found",
+          "Request or session data not found",
         );
       }
 
-      const result = await originalMethod.apply(this, args);
-      const profileId = request.session?.profile?.id;
+      const profileId = request.session.profile.id;
       const cacheKey = `${handlerName}_profile_${profileId}`;
 
       const cacheManager = this.cacheManager as CacheType;
       await cacheManager.del(cacheKey);
 
-      return result;
+      return originalMethod.apply(this, args);
     };
 
     return descriptor;

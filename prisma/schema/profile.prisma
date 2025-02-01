@@ -7,7 +7,6 @@ model Profile {
     password               String
     photo                  String?
     logo                   String?
-    plan                   Plan     @default(FREE)
     createdAt              DateTime @default(now())
     updatedAt              DateTime @updatedAt
     isTwoFactorAuthEnabled Boolean  @default(false)
@@ -21,10 +20,4 @@ model Profile {
     AuthorizationLogs AuthorizationLog[]
 
     @@index([email, createdAt, verificationToken])
-}
-
-enum Plan {
-    FREE
-    PROFESSIONAL
-    ENTERPRISE
 }

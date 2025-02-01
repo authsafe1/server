@@ -1,7 +1,4 @@
 -- CreateEnum
-CREATE TYPE "Plan" AS ENUM ('FREE', 'PROFESSIONAL', 'ENTERPRISE');
-
--- CreateEnum
 CREATE TYPE "TicketStatus" AS ENUM ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'UNRESOLVED');
 
 -- CreateEnum
@@ -9,6 +6,9 @@ CREATE TYPE "Severity" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
 
 -- CreateEnum
 CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'CANCELLED', 'PAST_DUE', 'INCOMPLETE');
+
+-- CreateEnum
+CREATE TYPE "SubscriptionType" AS ENUM ('FREE', 'PROFESSIONAL', 'ENTERPRISE');
 
 -- CreateTable
 CREATE TABLE "ActivityLog" (
@@ -133,7 +133,6 @@ CREATE TABLE "Organization" (
     "name" TEXT NOT NULL,
     "domain" TEXT NOT NULL,
     "metadata" JSONB,
-    "plan" "Plan" NOT NULL DEFAULT 'FREE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "profileId" TEXT NOT NULL,
@@ -175,7 +174,6 @@ CREATE TABLE "Profile" (
     "password" TEXT NOT NULL,
     "photo" TEXT,
     "logo" TEXT,
-    "plan" "Plan" NOT NULL DEFAULT 'FREE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "isTwoFactorAuthEnabled" BOOLEAN NOT NULL DEFAULT false,
@@ -253,11 +251,10 @@ CREATE TABLE "SecurityAlert" (
 CREATE TABLE "Subscription" (
     "id" TEXT NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "endDate" TIMESTAMP(3),
-    "status" "SubscriptionStatus" NOT NULL DEFAULT 'ACTIVE',
-    "customerId" TEXT,
-    "subscriptionId" TEXT,
-    "amount" DECIMAL(65,30) NOT NULL,
+    "endDate" TIMESTAMP(3) NOT NULL,
+    "status" "SubscriptionStatus" NOT NULL DEFAULT 'INCOMPLETE',
+    "type" "SubscriptionType" NOT NULL DEFAULT 'FREE',
+    "subscriptionId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "profileId" TEXT NOT NULL,
@@ -398,10 +395,13 @@ CREATE INDEX "Secret_privateKey_publicKey_organizationId_idx" ON "Secret"("priva
 CREATE INDEX "SecurityAlert_severity_createdAt_profileId_idx" ON "SecurityAlert"("severity", "createdAt", "profileId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Subscription_subscriptionId_key" ON "Subscription"("subscriptionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Subscription_profileId_key" ON "Subscription"("profileId");
 
 -- CreateIndex
-CREATE INDEX "Subscription_profileId_customerId_subscriptionId_idx" ON "Subscription"("profileId", "customerId", "subscriptionId");
+CREATE INDEX "Subscription_profileId_subscriptionId_idx" ON "Subscription"("profileId", "subscriptionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
@@ -479,7 +479,7 @@ ALTER TABLE "Secret" ADD CONSTRAINT "Secret_organizationId_fkey" FOREIGN KEY ("o
 ALTER TABLE "SecurityAlert" ADD CONSTRAINT "SecurityAlert_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;

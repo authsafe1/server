@@ -11,6 +11,7 @@ import { TwoFAModule } from "./2fa/2fa.module";
 import { ApiKeyModule } from "./apiKey/apiKey.module";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
+import { BillingModule } from "./billing/billing.module";
 import { BrandingModule } from "./branding/branding.module";
 import { ClientModule } from "./client/client.module";
 import { redis } from "./common/config/redis.config";
@@ -69,6 +70,7 @@ import { WebhookModule } from "./webhook/webhook.module";
     TemplateModule,
     ListenerModule,
     OrganizationModule,
+    BillingModule,
     UserModule,
     AuthModule,
     ClientModule,
