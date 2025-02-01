@@ -1,9 +1,8 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsIn, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateBillingDto {
-  @IsString()
-  @IsNotEmpty()
-  planId: string;
+  @IsIn(["PROFESSIONAL", "ENTERPRISE"])
+  type: "PROFESSIONAL" | "ENTERPRISE";
 }
 
 export class VerifyPaymentDto {
