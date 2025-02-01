@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { Redis } from "ioredis";
 import Redlock, { ExecutionError, Lock, ResourceLockedError } from "redlock";
+import { redis } from "../../../common/config/redis.config";
 
 @Injectable()
 export class RedlockService implements OnModuleInit, OnModuleDestroy {
@@ -13,14 +14,8 @@ export class RedlockService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedlockService.name);
   private redisClient: Redis;
 
-  constructor() {}
-
   onModuleInit() {
-    this.redisClient = new Redis(
-      Number(process.env.REDIS_PORT),
-      process.env.REDIS_HOST,
-      { password: process.env.REDIS_PASSWORD },
-    );
+    this.redisClient = redis;
 
     this.redlock = new Redlock([this.redisClient], {
       driftFactor: 0.01,
@@ -30,7 +25,7 @@ export class RedlockService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.redisClient.on("error", err => {
-      this.logger.error(`Redis connection error: ${err}`);
+      this.logger.error(`Redis connection error: ${err.message}`);
     });
 
     this.redisClient.on("connect", () => {
