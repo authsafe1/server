@@ -1,7 +1,4 @@
 -- CreateEnum
-CREATE TYPE "Plan" AS ENUM ('FREE', 'PROFESSIONAL', 'ENTERPRISE');
-
--- CreateEnum
 CREATE TYPE "TicketStatus" AS ENUM ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'UNRESOLVED');
 
 -- CreateEnum
@@ -9,6 +6,9 @@ CREATE TYPE "Severity" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
 
 -- CreateEnum
 CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'CANCELLED', 'PAST_DUE', 'INCOMPLETE');
+
+-- CreateEnum
+CREATE TYPE "SubscriptionType" AS ENUM ('FREE', 'PROFESSIONAL', 'ENTERPRISE');
 
 -- CreateTable
 CREATE TABLE "ActivityLog" (
@@ -133,7 +133,6 @@ CREATE TABLE "Organization" (
     "name" TEXT NOT NULL,
     "domain" TEXT NOT NULL,
     "metadata" JSONB,
-    "plan" "Plan" NOT NULL DEFAULT 'FREE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "profileId" TEXT NOT NULL,
@@ -175,7 +174,6 @@ CREATE TABLE "Profile" (
     "password" TEXT NOT NULL,
     "photo" TEXT,
     "logo" TEXT,
-    "plan" "Plan" NOT NULL DEFAULT 'FREE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "isTwoFactorAuthEnabled" BOOLEAN NOT NULL DEFAULT false,
@@ -253,8 +251,9 @@ CREATE TABLE "SecurityAlert" (
 CREATE TABLE "Subscription" (
     "id" TEXT NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "endDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3) NOT NULL,
     "status" "SubscriptionStatus" NOT NULL DEFAULT 'INCOMPLETE',
+    "type" "SubscriptionType" NOT NULL DEFAULT 'FREE',
     "subscriptionId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

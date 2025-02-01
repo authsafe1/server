@@ -1,8 +1,9 @@
 model Subscription {
     id             String             @id @default(uuid())
     startDate      DateTime           @default(now())
-    endDate        DateTime?
+    endDate        DateTime
     status         SubscriptionStatus @default(INCOMPLETE)
+    type           SubscriptionType   @default(FREE)
     subscriptionId String             @unique()
     createdAt      DateTime           @default(now())
     updatedAt      DateTime           @updatedAt
@@ -18,4 +19,10 @@ enum SubscriptionStatus {
     CANCELLED
     PAST_DUE
     INCOMPLETE
+}
+
+enum SubscriptionType {
+    FREE
+    PROFESSIONAL
+    ENTERPRISE
 }
