@@ -21,7 +21,7 @@ export class ErrorFilter implements ExceptionFilter {
 
     if (status >= HttpStatus.BAD_REQUEST) {
       const severity = this.determineSeverity(status);
-      if (request.session.profile) {
+      if (request.session?.profile?.id) {
         await this.securityAlertService.createAlert(
           exception.message,
           severity,
