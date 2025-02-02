@@ -41,7 +41,16 @@ export class SecurityAlertService {
     url?: string,
   ) {
     try {
-      return this.prismaService.securityAlert.create({
+      const profileExists = await this.prismaService.profile.findUnique({
+        where: { id: profileId },
+      });
+
+      if (!profileExists) {
+        this.logger.error(`Profile with ID ${profileId} not found.`);
+        return;
+      }
+
+      return await this.prismaService.securityAlert.create({
         data: {
           message,
           severity,
@@ -51,7 +60,7 @@ export class SecurityAlertService {
         },
       });
     } catch (err) {
-      this.logger.error(err);
+      this.logger.error("Error creating security alert:", err);
     }
   }
 
