@@ -1,6 +1,7 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { RedisStore } from "connect-redis";
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
@@ -54,6 +55,13 @@ async function bootstrap() {
     limit: "10mb",
   });
   app.enableShutdownHooks();
+  const config = new DocumentBuilder()
+    .setTitle("AuthSafe")
+    .setDescription("API for managing AuthSafe's features")
+    .setVersion("0.0.1")
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("docs", app, document);
   await app.listen(3000);
 }
 bootstrap();

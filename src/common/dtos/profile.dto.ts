@@ -1,3 +1,4 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { Transform } from "class-transformer";
 import {
@@ -9,13 +10,16 @@ import {
 } from "class-validator";
 
 export class CreateProfileDto {
+  @ApiProperty()
   @IsString()
   name: string;
 
+  @ApiProperty()
   @IsEmail()
   @Transform(params => params.value.toLowerCase())
   email: string;
 
+  @ApiProperty()
   @IsString()
   @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
     message:
@@ -25,6 +29,7 @@ export class CreateProfileDto {
 }
 
 export class ChangePasswordDto {
+  @ApiProperty()
   @IsString()
   @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
     message:
@@ -32,6 +37,7 @@ export class ChangePasswordDto {
   })
   oldPassword: string;
 
+  @ApiProperty()
   @IsString()
   @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
     message:
@@ -41,15 +47,18 @@ export class ChangePasswordDto {
 }
 
 export class UpdateProfileDto {
+  @ApiProperty()
   @IsOptional()
   @IsString()
   name?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsEmail()
   @Transform(params => params.value.toLowerCase())
   email?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
   @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[@#!$%^&])(?=.*\d).{8,}$/, {
@@ -58,6 +67,7 @@ export class UpdateProfileDto {
   })
   password?: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsObject()
   metadata?: JsonValue;
