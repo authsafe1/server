@@ -14,7 +14,6 @@ import {
 } from "@prisma/client";
 import argon2 from "argon2";
 import { Queue } from "bullmq";
-import { UploadApiErrorResponse } from "cloudinary";
 import { randomBytes } from "crypto";
 import dayjs from "dayjs";
 import { promisify } from "util";
@@ -322,9 +321,16 @@ export class ProfileService {
             password: newDigest,
           },
         });
+      } else {
+        throw new UnauthorizedException("Passwords do not match");
       }
-      return await this.prismaService.profile.update;
-    } catch {}
+    } catch (err) {
+      if (err instanceof UnauthorizedException) {
+        throw new UnauthorizedException("Passwords do not match");
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
   }
 
   async updateProfilePhoto(params: {
@@ -349,14 +355,8 @@ export class ProfileService {
         },
       });
     } catch (error) {
-      if (
-        (error as UploadApiErrorResponse).http_code &&
-        (error as UploadApiErrorResponse).message
-      ) {
-        throw new HttpException(
-          (error as UploadApiErrorResponse).message,
-          (error as UploadApiErrorResponse).http_code,
-        );
+      if (error.http_code && error.message) {
+        throw new HttpException(error.message, error.http_code);
       } else {
         throw new InternalServerErrorException(
           "Failed to upload to cloudinary",
