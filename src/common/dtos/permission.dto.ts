@@ -1,3 +1,4 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { Prisma } from "@prisma/client";
 import { Transform, Type } from "class-transformer";
 import {
@@ -11,10 +12,12 @@ import {
 } from "class-validator";
 
 export class CreatePermissionDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   name: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @Transform(({ value }) => `org:${value.toLowerCase()}`)
@@ -24,6 +27,7 @@ export class CreatePermissionDto {
   })
   key: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @IsOptional()
@@ -31,11 +35,13 @@ export class CreatePermissionDto {
 }
 
 export class UpdatePermissionDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @IsOptional()
   name?: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @IsOptional()
@@ -43,26 +49,31 @@ export class UpdatePermissionDto {
 }
 
 export class PermissionsDto {
+  @ApiProperty()
   @IsOptional()
   @IsInt()
   @Min(0)
   @Type(() => Number)
   skip?: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsInt()
   @Min(1)
   @Type(() => Number)
   take?: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsObject()
   cursor?: Prisma.PermissionWhereUniqueInput;
 
+  @ApiProperty()
   @IsOptional()
   @IsObject()
   where?: Prisma.PermissionWhereInput;
 
+  @ApiProperty()
   @IsOptional()
   @IsObject()
   orderBy?: Prisma.PermissionOrderByWithRelationInput;
